@@ -1,0 +1,199 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Colaborador;
+use App\Models\Empresa;
+use App\Models\Identificacion;
+
+class ColaboradorController extends Controller
+{
+    public function index()
+    {
+        $colaboradores = Colaborador::with('empresa','identificacion')->get();
+
+        return view('colaboradores.index',compact('colaboradores'));
+    }
+
+    public function create()
+    {
+        $empresas = Empresa::where('estado',1)->get();
+        $identificaciones = Identificacion::where('estado',1)->get();
+
+        return view('colaboradores.create', compact('empresas','identificaciones'));
+        
+    }
+
+    public function store(Request $request){
+
+        $request->validate([
+            'id_empresa' => 'required|exists:empresa,id_empresa',
+            'id_tipo_identificacion' => 'required|exists:identificacion,id_identificacion',
+    
+            'numero_identificacion' => 'required|string|max:50|unique:colaborador,numero_identificacion',
+    
+            'primer_nombre' => 'required|string|max:100',
+            'segundo_nombre' => 'nullable|string|max:100',
+    
+            'primer_apellido' => 'required|string|max:100',
+            'segundo_apellido' => 'nullable|string|max:100',
+    
+            'fecha_nacimiento' => 'nullable|date',
+    
+            'genero' => 'nullable|string|max:20',
+    
+            'direccion' => 'nullable|string|max:255',
+            'ciudad' => 'nullable|string|max:100',
+            'barrio' => 'nullable|string|max:100',
+    
+            'estado_civil' => 'nullable|string|max:50',
+    
+            'telefono_residencial' => 'nullable|string|max:20',
+            'telefono_celular' => 'nullable|string|max:20',
+    
+            'estudios' => 'nullable|string|max:255',
+    
+            'estado' => 'required|boolean'
+        ]);
+
+        Colaborador::create([
+            'id_empresa' => $request->id_empresa,
+            'id_tipo_identificacion' => $request->id_tipo_identificacion,
+            'numero_identificacion' => $request->numero_identificacion,
+            'primer_nombre' => $request->primer_nombre,
+            'segundo_nombre' => $request->segundo_nombre,
+            'primer_apellido' => $request->primer_apellido,
+            'segundo_apellido' => $request->segundo_apellido,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'genero' => $request->genero,
+            'direccion' => $request->direccion,
+            'ciudad' => $request->ciudad,
+            'barrio' => $request->barrio,
+            'estado_civil' => $request->estado_civil,
+            'telefono_residencial' => $request->telefono_residencial,
+            'telefono_celular' => $request->telefono_celular,
+            'estudios' => $request->estudios,
+            'estado' => $request->estado,
+        ]);
+
+        return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'Colaborador creado Exitosamente');
+    }
+
+    public function edit(Colaborador $colaborador)
+    {
+        $empresas =Empresa::where('estado',1)->get();
+        $identificaciones =Identificacion::where('estado',1)->get();
+
+        return view('colaboradores.edit',
+        compact(
+            'colaborador',
+            'empresas',
+            'identificaciones'
+        ));
+    }
+
+    public function update(Request $request, Colaborador $colaborador)
+    {
+        $request -> validate([
+            'id_empresa' => 'required|exists:empresa,id_empresa',
+            'id_tipo_identificacion' => 'required|exists:identificacion,id_identificacion',
+
+            'numero_identificacion' => 'required|string|max:50|unique:colaborador,numero_identificacion,' . $colaborador->id_colaborador . ',id_colaborador',
+
+            'primer_nombre' => 'required|string|max:100',
+            'segundo_nombre' => 'nullable|string|max:100',
+            'primer_apellido' => 'required|string|max:100',
+            'segundo_apellido' => 'nullable|string|max:100',
+
+            'fecha_nacimiento' => 'nullable|date',
+            'genero' => 'nullable|string|max:20',
+            'direccion' => 'nullable|string|max:255',
+            'ciudad' => 'nullable|string|max:100',
+            'barrio' => 'nullable|string|max:100',
+            'estado_civil' => 'nullable|string|max:50',
+            'telefono_residencial' => 'nullable|string|max:20',
+            'telefono_celular' => 'nullable|string|max:20',
+            'estudios' => 'nullable|string|max:255',
+
+            'estado' => 'required|boolean'
+        ]);
+
+        $colaborador->update($request->only([
+            'id_empresa',
+            'id_tipo_identificacion',
+            'numero_identificacion',
+            'primer_nombre',
+            'segundo_nombre',
+            'primer_apellido',
+            'segundo_apellido',
+            'fecha_nacimiento',
+            'genero',
+            'direccion',
+            'ciudad',
+            'barrio',
+            'estado_civil',
+            'telefono_residencial',
+            'telefono_celular',
+            'estudios',
+            'estado'
+        ]));
+
+    return redirect()
+        ->route('colaboradores.index')
+        ->with('success', 'Colaborador actualizado correctamente');
+    }
+
+    public function inactivar(Colaborador $colaborador)
+    {
+        if ($colaborador->estado == 0) {
+        return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'El colaborador ya está inactivo.');
+        }
+
+        $colaborador->update([
+            'estado' => 0
+        ]);
+
+        return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'Colaborador inactivado correctamente.');
+        }
+
+    public function activar(Colaborador $colaborador)
+    {
+        if ($colaborador->estado == 1) {
+        return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'El colaborador ya está activo.');
+        }
+
+        $colaborador->update([
+            'estado' => 1
+        ]);
+    
+        return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'Colaborador activado correctamente.');
+    
+        }
+
+    public function documentos(Colaborador $colaborador)
+    {
+        $documentos = $colaborador->documentos()
+            ->with(['categoria','area','usuario'])
+            ->orderBy('created_at')
+            ->get();
+
+        return view('colaboradores.documentos', compact('colaborador','documentos'));
+    }
+
+    public function detalle(Colaborador $colaborador)
+    {
+        $colaborador->load(['empresa', 'identificacion', 'informacionAdicional']);
+        return view('colaboradores.detalle', compact('colaborador'));
+    }
+}
