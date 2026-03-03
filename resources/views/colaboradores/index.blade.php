@@ -79,7 +79,7 @@
                             @endif
                         </td>
 
-                        <td>
+                        <td class = "text-center">
                             {{-- Ver Detalle --}}
                             @if(in_array('colaboradores.ver', session('permisos_usuario', [])))
                                 <a href="{{ route('colaboradores.detalle', $colaborador) }}"
