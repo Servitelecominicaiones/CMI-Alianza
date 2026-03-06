@@ -150,9 +150,30 @@ class DocumentoController extends Controller
         /* ===== NOMBRE ÚNICO ===== */
         $hashNombre = Str::uuid() . '.' . $extension;
 
+         /* ===== DETERMINAR PROPIETARIO DEL DOCUMENTO ===== */
+        $ownerType = null;
+        $ownerId = null;
+
+        if ($request->filled('tipo_propietario')) {
+            if ($request->tipo_propietario === 'empresa' && $request->filled('empresa_id')) {
+                $ownerType = 'empresa';
+                $ownerId = $request->empresa_id;
+                $empresa = Empresa::findOrFail($ownerId);
+                $identificador = $empresa -> nombre_empresa;
+            } elseif ($request->tipo_propietario === 'colaborador' && $request->filled('colaborador_id')) {
+                $ownerType = 'colaborador';
+                $ownerId = $request->colaborador_id;
+                $colaborador = Colaborador::findOrFail($ownerId);
+                $identificador = $colaborador->numero_identificacion;
+            }
+        }
+
+
         /* ===== RUTA FÍSICA ===== */
         $rutaFisica = public_path(
             'bodega_documental/' .
+            Str::slug($ownerType). '/' .
+            Str::slug($identificador). '/' .
             Str::slug($categoria->nombre) . '/' .
             Str::slug($area->nombre) . '/' .
             $anio
@@ -167,24 +188,12 @@ class DocumentoController extends Controller
 
         /* ===== RUTA PARA BD ===== */
         $rutaBD = 'bodega_documental/' .
+            Str::slug($ownerType). '/' .
+            Str::slug($identificador). '/' .
             Str::slug($categoria->nombre) . '/' .
             Str::slug($area->nombre) . '/' .
             $anio . '/' .
             $hashNombre;
-        
-        /* ===== DETERMINAR PROPIETARIO DEL DOCUMENTO ===== */
-        $ownerType = null;
-        $ownerId = null;
-
-        if ($request->filled('tipo_propietario')) {
-            if ($request->tipo_propietario === 'empresa' && $request->filled('empresa_id')) {
-                $ownerType = 'empresa';
-                $ownerId = $request->empresa_id;
-            } elseif ($request->tipo_propietario === 'colaborador' && $request->filled('colaborador_id')) {
-                $ownerType = 'colaborador';
-                $ownerId = $request->colaborador_id;
-            }
-        }
 
         /* ===== GUARDAR DOCUMENTO ===== */
         $documento = Documento::create([
@@ -312,12 +321,33 @@ class DocumentoController extends Controller
             $areaNueva = Area::findOrFail($request->area_id);
             $anio = $documento->anio;
 
+            // === Determinar Propietario del archivo === //
+            $ownerType = null;
+            $ownerId = null;
+
+            if ($request->filled('tipo_propietario')) 
+            {
+                if ($request->tipo_propietario === 'empresa' && $request->filled('empresa_id')) {
+                    $ownerType = 'empresa';
+                    $ownerId = $request->empresa_id;
+                    $empresaNueva = Empresa::findOrFail($ownerId);
+                    $identificador = $empresaNueva -> nombre_empresa;
+                } elseif ($request->tipo_propietario === 'colaborador' && $request->filled('colaborador_id')) {
+                    $ownerType = 'colaborador';
+                    $ownerId = $request->colaborador_id;
+                    $colaboradorNuevo = Colaborador::findOrFail($ownerId);
+                    $identificador = $colaboradorNuevo -> numero_identificacion;
+                }
+            }
+
             // === RUTA ACTUAL ===
             $rutaActual = public_path($documento->ruta_completa);
 
             // === NUEVA RUTA ===
             $nuevaRutaFisica = public_path(
                 'bodega_documental/' .
+                Str::slug($ownerType) . '/' .
+                Str::slug($identificador). '/' .
                 Str::slug($categoriaNueva->nombre) . '/' .
                 Str::slug($areaNueva->nombre) . '/' .
                 $anio
@@ -329,6 +359,8 @@ class DocumentoController extends Controller
             }
 
             $nuevaRutaBD = 'bodega_documental/' .
+                Str::slug($ownerType) . '/' .
+                Str::slug($identificador). '/' .
                 Str::slug($categoriaNueva->nombre) . '/' .
                 Str::slug($areaNueva->nombre) . '/' .
                 $anio . '/' .
@@ -345,21 +377,6 @@ class DocumentoController extends Controller
                     $rutaActual,
                     public_path($nuevaRutaBD)
                 );
-            }
-
-            // === Determinar Propietario del archivo ===
-            $ownerType = null;
-            $ownerId = null;
-
-            if ($request->filled('tipo_propietario')) 
-            {
-                if ($request->tipo_propietario === 'empresa' && $request->filled('empresa_id')) {
-                    $ownerType = 'empresa';
-                    $ownerId = $request->empresa_id;
-                } elseif ($request->tipo_propietario === 'colaborador' && $request->filled('colaborador_id')) {
-                    $ownerType = 'colaborador';
-                    $ownerId = $request->colaborador_id;
-                }
             }
 
             // === ACTUALIZAR DOCUMENTO ===
