@@ -31,23 +31,17 @@ class Colaborador extends Model
 
     public $timestamps = true;
 
-    public function empresa()
-    {
-        return $this->belongsTo(Empresa::class, 'id_empresa');
-    }
-
     public function identificacion()
     {
         return $this->belongsTo(Identificacion::class, 'id_tipo_identificacion');
     }
 
-    public function informacionAdicional()
-    {
-        return $this->hasOne(InformacionAdicionalColaborador::class, 'id_colaborador');
-    }
-
     public function documentos()
     {
         return $this->morphMany(Documento::class, 'owner');
+    }
+
+    public function contratos(){
+        return $this->hasMany(Contrato::class, 'id_colaborador');
     }
 }

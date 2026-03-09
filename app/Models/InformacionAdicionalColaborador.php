@@ -36,7 +36,7 @@ class InformacionAdicionalColaborador extends Model
 
     public $timestamps = false;
 
-    public function colaborador(){
-        return $this->belongsTo(Colaborador::class, 'id_colaborador');
+    public function contratos(){
+        return $this->hasMany(Contrato::class, 'id_informacion_adicional');
     }
 }
