@@ -28,6 +28,9 @@ class ContratoService
                 'finalizacion_contrato' => $informacion->fecha_terminacion 
             ]);
 
+            //Activar Colaborador
+            $colaborador->update(['estado'=>1]);
+
             return $contrato;
         });
     }

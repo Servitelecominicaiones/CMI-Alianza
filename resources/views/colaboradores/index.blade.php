@@ -23,11 +23,10 @@
                     <th>Nombre</th>
                     <th>Telefonó Celular</th>
                     <th class ="text-center">Documentos</th>
-                    <th class="text-center">Información Adicional</th>
                     <th class="text-center">Detalle</th>
                     <th>Estado</th>
                     <th class="text-center">Acciones</th>
-                    <th> Inactivar Contrato </th>  
+                    
                 </tr>
             </thead>
             <tbody>
@@ -54,28 +53,6 @@
                             </a>
                         </td>
 
-                        {{-- Botón mutable Info Adicional --}}
-                        <td class="text-center">
-                            @if($colaborador->contratoActivo())
-                                {{-- Ya tiene info adicional → botón editar --}}
-                                @if(in_array('colaboradores.editar', session('permisos_usuario', [])))
-                                    <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
-                                       class="btn btn-sm btn-secondary"
-                                       title="Editar información adicional">
-                                        <i class="bi bi-clipboard2-check"></i>
-                                    </a>
-                                @endif
-                            @else
-                                {{-- No tiene info adicional → botón crear --}}
-                                @if(in_array('colaboradores.crear', session('permisos_usuario', [])))
-                                    <a href="{{ route('informacion_adicional.create', $colaborador) }}"
-                                       class="btn btn-sm btn-outline-secondary"
-                                       title="Agregar información adicional">
-                                        <i class="bi bi-clipboard2-plus"></i>
-                                    </a>
-                                @endif
-                            @endif
-                        </td>
 
                         <td class = "text-center">
                             {{-- Ver Detalle --}}
@@ -109,16 +86,12 @@
                                 in_array('colaboradores.eliminar', session('permisos_usuario', []))
                                 && $colaborador->estado
                             )
-                                <form method="POST"
-                                      action="{{ route('colaboradores.inactivar', $colaborador) }}"
-                                      class="d-inline form-inactivar">
-                                    @csrf
-                                    @method('PUT')
-
-                                    <button type="submit" class="btn btn-sm btn-danger">
+                                <button type="button"
+                                    class="btn btn-sm btn-danger btn-inactivar-contrato"
+                                    data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
+                                    title="Inactivar colaborador">
                                         <i class="bi bi-person-x"></i>
-                                    </button>
-                                </form>
+                                </button>
                             @endif
 
                             {{-- Activar --}}
@@ -126,28 +99,11 @@
                                 in_array('colaboradores.eliminar', session('permisos_usuario', []))
                                 && !$colaborador->estado
                             )
-                                <form method="POST"
-                                      action="{{ route('colaboradores.activar', $colaborador) }}"
-                                      class="d-inline form-activar">
-                                    @csrf
-                                    @method('PUT')
-
-                                    <button type="submit" class="btn btn-sm btn-success">
-                                        <i class="bi bi-person-check"></i>
-                                    </button>
-                                </form>
-                            @endif
-
-                        </td>
-                        <td class="text-center">
-                            {{-- Botón dentro del @forelse --}}
-                            @if($colaborador->contratoActivo())
-                                <button type="button"
-                                        class="btn btn-sm btn-danger btn-inactivar-contrato"
-                                        data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
-                                        title="Inactivar contrato">
-                                    <i class="bi bi-file-earmark-x"></i>
-                                </button>
+                                <a href="{{ route('informacion_adicional.create', $colaborador) }}"
+                                class="btn btn-sm btn-success"
+                                title="Crear nuevo contrato">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                </a>
                             @endif
                         </td>
                     </tr>

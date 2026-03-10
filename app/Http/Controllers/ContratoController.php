@@ -45,6 +45,9 @@ class ContratoController extends Controller
             'finalizacion_contrato' => Carbon::now()
         ]);
 
+        // Inactivar colaborador también
+        $colaborador->update(['estado' => 0]);
+
         return redirect()
             ->route('colaboradores.index')
             ->with('success', 'Contrato inactivado exitosamente.');
