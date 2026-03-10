@@ -176,6 +176,7 @@
                             {{-- info adicional: --}}
                             <th>Cargo</th>
                             <th>Salario Básico</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -192,6 +193,35 @@
                             <td>{{ $contratoActivo->informacionAdicional->salario_basico
                                     ? '$ ' . number_format($contratoActivo->informacionAdicional->salario_basico, 2, ',', '.')
                                     : '—' }}</td>
+
+                            <td class="text-center d-flex gap-2 justify-content-center">
+                            
+                                {{-- Ver info adicional --}}
+                                <a href="{{ route('contrato.verInfo', $contratoActivo) }}"
+                                   class="btn btn-sm btn-primary"
+                                   title="Ver información adicional"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            
+                                {{-- Editar info adicional --}}
+                                <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
+                                   class="btn btn-sm btn-warning"
+                                   title="Editar información adicional"
+                                   data-bs-toggle="tooltip">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            
+                                {{-- Inactivar contrato --}}
+                                <button type="button"
+                                        class="btn btn-sm btn-danger btn-inactivar-contrato"
+                                        data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
+                                        title="Inactivar contrato"
+                                        data-bs-toggle="tooltip">
+                                    <i class="bi bi-file-earmark-x"></i>
+                                </button>
+                            
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -217,6 +247,7 @@
                             <th>Cargo</th>
                             <th>Salario Básico</th>
                             <th>Motivo Inactivación</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -245,6 +276,14 @@
                                         —
                                     @endif
                                 </td>
+                                <td class="text-center">
+                                    <a href="{{ route('contrato.verInfo', $inactivo) }}"
+                                    class="btn btn-sm btn-secondary"
+                                    title="Ver información adicional"
+                                    data-bs-toggle="tooltip">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -255,6 +294,11 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalInactivarContrato" tabindex="-1">
+    <div id="modalInactivarContratoContenido"></div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -262,6 +306,36 @@
 <script>
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
         new bootstrap.Tooltip(el);
+    });
+
+    document.querySelectorAll('.btn-inactivar-contrato').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const url = this.dataset.url;
+        const contenedor = document.getElementById('modalInactivarContratoContenido');
+
+        contenedor.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content p-4 text-center">
+                    <div class="spinner-border text-danger" role="status"></div>
+                    <p class="mt-2 mb-0">Cargando...</p>
+                </div>
+            </div>`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalInactivarContrato'));
+        modal.show();
+
+        fetch(url)
+            .then(res => res.text())
+            .then(html => { contenedor.innerHTML = html; })
+            .catch(() => {
+                contenedor.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content p-4 text-center text-danger">
+                            Error al cargar el modal.
+                        </div>
+                    </div>`;
+            });
+        });
     });
 </script>
 

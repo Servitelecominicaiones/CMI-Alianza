@@ -49,5 +49,12 @@ class ContratoController extends Controller
             ->route('colaboradores.index')
             ->with('success', 'Contrato inactivado exitosamente.');
     }
+
+    public function verInfo(Contrato $contrato)
+    {
+        $contrato->load(['informacionAdicional', 'empresa', 'colaborador']);
+
+        return view('contratos.ver-info', compact('contrato'));
+    }
 }
 

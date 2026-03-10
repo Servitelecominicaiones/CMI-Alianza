@@ -351,7 +351,7 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Empresas 
+    | Contratos
     |--------------------------------------------------------------------------
     */
 
@@ -362,4 +362,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('colaboradores/{colaborador}/contrato/inactivar', [ContratoController::class, 'inactivar'])
     ->name('contrato.inactivar')
     ->Middleware('permission:colaboradores.eliminar');
+
+    Route::get('contratos/{contrato}/info', [ContratoController::class, 'verInfo'])
+    ->name('contrato.verInfo')
+    ->Middleware('permission:colaboradores.ver');
 });
