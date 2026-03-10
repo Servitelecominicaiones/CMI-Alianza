@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\PermissionMiddleware;
+use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DocumentoController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ColaboradorController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\InformacionAdicionalController;
+use App\Http\Controllers\ContratoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -345,4 +347,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/empresas/{empresa}/detalle', [EmpresaController::class, 'detalle'])
         ->name('empresas.detalle')
         ->middleware('permission:empresas.ver');
+    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Empresas 
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('colaboradores/{colaborador}/contrato/modal-inactivar', [ContratoController::class, 'inactivarModal'])
+    ->name('contrato.modal-inactivar')
+    ->Middleware('permission:colaboradores.eliminar');
+
+    Route::put('colaboradores/{colaborador}/contrato/inactivar', [ContratoController::class, 'inactivar'])
+    ->name('contrato.inactivar')
+    ->Middleware('permission:colaboradores.eliminar');
 });

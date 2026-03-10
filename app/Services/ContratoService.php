@@ -22,8 +22,10 @@ class ContratoService
             $contrato = Contrato::create([
                 'id_empresa' => $idEmpresa,
                 'id_colaborador' => $colaborador->id_colaborador,
-                'id_informacion_adicional' => $informacion->id_informacion_adicional,
-                'estado' => 1
+                'id_informacion_adicional' => $informacion->id_informacion_adicional,                
+                'estado' => 1,
+                'inicio_contrato' => $informacion->fecha_inicial,
+                'finalizacion_contrato' => $informacion->fecha_terminacion 
             ]);
 
             return $contrato;

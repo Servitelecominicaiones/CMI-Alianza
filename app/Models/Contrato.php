@@ -15,7 +15,10 @@ class Contrato extends Model
         'id_empresa',
         'id_colaborador',
         'id_informacion_adicional',
-        'estado'
+        'inicio_contrato',
+        'finalizacion_contrato',
+        'estado',
+        'motivo_inactivacion'
     ];
 
     public function empresa(){

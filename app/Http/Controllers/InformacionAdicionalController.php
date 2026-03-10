@@ -120,7 +120,9 @@ class InformacionAdicionalController extends Controller
         ]);
 
         $contrato->update([
-            'id_empresa' => $validated['id_empresa']
+            'id_empresa' => $validated['id_empresa'],
+            'inicio_contrato' => $validated['fecha_inicial'],
+            'finalizacion_contrato' => $validated['fecha_terminacion']
         ]);
 
         $informacion->update($validated);

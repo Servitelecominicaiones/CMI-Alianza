@@ -21,12 +21,13 @@
                     <th>Tipo Identificación</th>
                     <th>Identificación</th>
                     <th>Nombre</th>
-                    <th>Telfonó Celular</th>
+                    <th>Telefonó Celular</th>
                     <th class ="text-center">Documentos</th>
                     <th class="text-center">Información Adicional</th>
                     <th class="text-center">Detalle</th>
                     <th>Estado</th>
                     <th class="text-center">Acciones</th>
+                    <th> Inactivar Contrato </th>  
                 </tr>
             </thead>
             <tbody>
@@ -138,7 +139,17 @@
                             @endif
 
                         </td>
-
+                        <td class="text-center">
+                            {{-- Botón dentro del @forelse --}}
+                            @if($colaborador->contratoActivo())
+                                <button type="button"
+                                        class="btn btn-sm btn-danger btn-inactivar-contrato"
+                                        data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
+                                        title="Inactivar contrato">
+                                    <i class="bi bi-file-earmark-x"></i>
+                                </button>
+                            @endif
+                        </td>
                     </tr>
                     
                 @empty
@@ -150,6 +161,12 @@
                 @endforelse
             </tbody>
         </table>
+
+        {{-- Contenedor global del modal --}}
+        <div class="modal fade" id="modalInactivarContrato" tabindex="-1">
+            <div id="modalInactivarContratoContenido"></div>
+        </div>
+
     </div>
 </div>
 @endsection
@@ -222,6 +239,39 @@ $(document).ready(function () {
                 }
             }
         ]
+    });
+});
+
+document.querySelectorAll('.btn-inactivar-contrato').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const url = this.dataset.url;
+        const contenedor = document.getElementById('modalInactivarContratoContenido');
+
+        // Limpiar y mostrar loading
+        contenedor.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content p-4 text-center">
+                    <div class="spinner-border text-danger" role="status"></div>
+                    <p class="mt-2 mb-0">Cargando...</p>
+                </div>
+            </div>`;
+
+        // Abrir modal
+        const modal = new bootstrap.Modal(document.getElementById('modalInactivarContrato'));
+        modal.show();
+
+        // Cargar contenido via AJAX
+        fetch(url)
+            .then(res => res.text())
+            .then(html => { contenedor.innerHTML = html; })
+            .catch(() => {
+                contenedor.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content p-4 text-center text-danger">
+                            Error al cargar el modal.
+                        </div>
+                    </div>`;
+            });
     });
 });
 </script>

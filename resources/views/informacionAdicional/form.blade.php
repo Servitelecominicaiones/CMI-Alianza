@@ -159,15 +159,18 @@
             </div>
 
             {{-- Medios de Transporte --}}
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label class="form-label">Medios de Transporte</label>
-                <input type="number"
-                       name="medios_transporte"
-                       class="form-control @error('medios_transporte') is-invalid @enderror"
-                       value="{{ old('medios_transporte', $informacion->medios_transporte ?? '') }}">
-                @error('medios_transporte')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number"
+                        name="medios_transporte"
+                        class="form-control @error('medios_transporte') is-invalid @enderror"
+                        value="{{ old('medios_transporte', $informacion->medios_transporte ?? '') }}">
+                    @error('medios_transporte')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
             </div>
 
             {{-- Factor Prestacional --}}
@@ -176,9 +179,9 @@
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="factor_prestacional"
-                           class="form-control @error('factor_prestacional') is-invalid @enderror"
-                           value="{{ old('factor_prestacional', $informacion->factor_prestacional ?? '') }}">
+                        name="factor_prestacional"
+                        class="form-control @error('factor_prestacional') is-invalid @enderror"
+                        value="{{ old('factor_prestacional', $informacion->factor_prestacional ?? '') }}">
                     @error('factor_prestacional')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -191,9 +194,9 @@
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="bono_servicio"
-                           class="form-control @error('bono_servicio') is-invalid @enderror"
-                           value="{{ old('bono_servicio', $informacion->bono_servicio ?? '') }}">
+                        name="bono_servicio"
+                        class="form-control @error('bono_servicio') is-invalid @enderror"
+                        value="{{ old('bono_servicio', $informacion->bono_servicio ?? '') }}">
                     @error('bono_servicio')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -206,9 +209,9 @@
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="bono_salud_y_vivienda"
-                           class="form-control @error('bono_salud_y_vivienda') is-invalid @enderror"
-                           value="{{ old('bono_salud_y_vivienda', $informacion->bono_salud_y_vivienda ?? '') }}">
+                        name="bono_salud_y_vivienda"
+                        class="form-control @error('bono_salud_y_vivienda') is-invalid @enderror"
+                        value="{{ old('bono_salud_y_vivienda', $informacion->bono_salud_y_vivienda ?? '') }}">
                     @error('bono_salud_y_vivienda')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -221,9 +224,9 @@
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="prima_riesgo"
-                           class="form-control @error('prima_riesgo') is-invalid @enderror"
-                           value="{{ old('prima_riesgo', $informacion->prima_riesgo ?? '') }}">
+                        name="prima_riesgo"
+                        class="form-control @error('prima_riesgo') is-invalid @enderror"
+                        value="{{ old('prima_riesgo', $informacion->prima_riesgo ?? '') }}">
                     @error('prima_riesgo')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
