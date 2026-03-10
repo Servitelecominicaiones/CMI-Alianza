@@ -186,14 +186,20 @@ class ColaboradorController extends Controller
     }
 
     public function detalle(Colaborador $colaborador)
-{
-    $colaborador->load('identificacion');
-    
-    $contrato = $colaborador->contratos()
-        ->where('estado', 1)
-        ->with(['empresa', 'informacionAdicional'])
-        ->first();
+    {
+        $colaborador->load('identificacion');
 
-    return view('colaboradores.detalle', compact('colaborador', 'contrato'));
-}
+        $contratoActivo = $colaborador->contratos()
+            ->where('estado', 1)
+            ->with(['empresa', 'informacionAdicional'])
+            ->first();
+        
+        $contratosInactivos = $colaborador->contratos()
+            ->where('estado',0)
+            ->with(['empresa','informacionAdicional'])
+            ->orderBy('id_contrato','desc')
+            ->get();
+
+        return view('colaboradores.detalle', compact('colaborador', 'contratoActivo','contratosInactivos'));
+    }
 }

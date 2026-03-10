@@ -15,7 +15,7 @@
                 {{ $colaborador->primer_apellido }}
                 {{ $colaborador->segundo_apellido }}
                 &mdash; {{ $colaborador->numero_identificacion }}
-                &mdash; {{ $contrato->empresa->nombre_empresa ?? 'Sin empresa' }}
+                &mdash; {{ $contratoActivo->empresa->nombre_empresa ?? 'Sin empresa' }}
             </small>
         </div>
         <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
@@ -38,7 +38,7 @@
                 <div class="col-md-4 mb-3">
                     <label class="form-label text-muted small">Empresa</label>
                     <p class="form-control-plaintext fw-semibold">
-                        {{ $contrato->empresa->nombre_empresa ?? '—' }}
+                        {{ $contratoActivo->empresa->nombre_empresa ?? '—' }}
                     </p>
                 </div>
 
@@ -158,161 +158,111 @@
     </div>
 
     {{-- ══════════════════════════════════════════
-         BLOQUE 2: Información Adicional
+        BLOQUE 2: Lista de Contrartos
     ═══════════════════════════════════════════ --}}
-
-    @if($contrato->informacionAdicional)
-
-        @php $info = $contrato->informacionAdicional; @endphp
-
-        {{-- Cargo --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-briefcase me-2"></i> Información del Cargo
-            </div>
-            <div class="card-body">
-                <div class="row">
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Cargo</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->cargo ?? '—' }}</p>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Medios de Transporte</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->medios_transporte ?? '—' }}</p>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label text-muted small">Fecha Inicial</label>
-                        <p class="form-control-plaintext fw-semibold">
-                            {{ $info->fecha_inicial
-                                ? \Carbon\Carbon::parse($info->fecha_inicial)->format('d/m/Y')
-                                : '—' }}
-                        </p>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label text-muted small">Fecha Terminación</label>
-                        <p class="form-control-plaintext fw-semibold">
-                            {{ $info->fecha_terminacion
-                                ? \Carbon\Carbon::parse($info->fecha_terminacion)->format('d/m/Y')
-                                : '—' }}
-                        </p>
-                    </div>
-
-                </div>
-            </div>
+    {{-- Contrato Activo --}}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <i class="bi bi-file-earmark-check me-2"></i> Contrato Activo
         </div>
-
-        {{-- Seguridad Social --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-shield-plus me-2"></i> Seguridad Social
-            </div>
-            <div class="card-body">
-                <div class="row">
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">EPS</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->eps ?? '—' }}</p>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Fondo de Pensiones</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->fondo ?? '—' }}</p>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Caja de Compensación</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->caja_compensacion ?? '—' }}</p>
-                    </div>
-
-                </div>
-            </div>
+        <div class="card-body">
+            @if($contratoActivo)
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Inicio de Contrato</th>
+                            <th>Finalización de Contrato</th>
+                            {{-- info adicional: --}}
+                            <th>Cargo</th>
+                            <th>Salario Básico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ $contratoActivo->empresa->nombre_empresa ?? '—' }}</td>
+                            <td>{{ $contratoActivo->inicio_contrato
+                                    ? \Carbon\Carbon::parse($contratoActivo->inicio_contrato)->format('d/m/Y')
+                                    : '—' }}</td>
+                            <td>{{ $contratoActivo->finalizacion_contrato
+                                    ? \Carbon\Carbon::parse($contratoActivo->finalizacion_contrato)->format('d/m/Y')
+                                    : '—' }}</td>
+                            {{-- Datos de informacionAdicional --}}
+                            <td>{{ $contratoActivo->informacionAdicional->cargo ?? '—' }}</td>
+                            <td>{{ $contratoActivo->informacionAdicional->salario_basico
+                                    ? '$ ' . number_format($contratoActivo->informacionAdicional->salario_basico, 2, ',', '.')
+                                    : '—' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            @else
+                <p class="text-muted mb-0">Este colaborador no tiene un contrato activo.</p>
+            @endif
         </div>
+    </div>
 
-        {{-- Salario y Beneficios Base --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-cash-coin me-2"></i> Salario y Beneficios Base
-            </div>
-            <div class="card-body">
-                <div class="row">
-
-                    @php
-                        $camposSalario = [
-                            'salario_basico'       => 'Salario Básico',
-                            'sub_transporte'       => 'Subsidio de Transporte',
-                            'factor_prestacional'  => 'Factor Prestacional',
-                            'bono_servicio'        => 'Bono de Servicio',
-                            'bono_salud_y_vivienda'=> 'Bono Salud y Vivienda',
-                            'prima_riesgo'         => 'Prima de Riesgo',
-                        ];
-                    @endphp
-
-                    @foreach($camposSalario as $campo => $etiqueta)
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label text-muted small">{{ $etiqueta }}</label>
-                            <p class="form-control-plaintext fw-semibold">
-                                {{ $info->$campo !== null
-                                    ? '$ ' . number_format($info->$campo, 2, ',', '.')
-                                    : '—' }}
-                            </p>
-                        </div>
-                    @endforeach
-
-                </div>
-            </div>
+    {{-- Contratos Inactivos --}}
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <i class="bi bi-file-earmark-x me-2"></i> Historial de Contratos Inactivos
         </div>
-
-        {{-- Bonos y Auxilios Adicionales --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-gift me-2"></i> Bonos y Auxilios Adicionales
-            </div>
-            <div class="card-body">
-                <div class="row">
-
-                    @php
-                        $camposAdicionales = [
-                            'auxilio_formacion'  => 'Auxilio de Formación',
-                            'comision_fija'      => 'Comisión Fija',
-                            'productividad_fija' => 'Productividad Fija',
-                            'tiempo_extra_fijo'  => 'Tiempo Extra Fijo',
-                            'bono_mercado'       => 'Bono Mercado',
-                            'auxilio_equipo'     => 'Auxilio de Equipo',
-                            'recargo_nocturno'   => 'Recargo Nocturno',
-                            'trans_adicional'    => 'Transporte Adicional',
-                        ];
-                    @endphp
-
-                    @foreach($camposAdicionales as $campo => $etiqueta)
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label text-muted small">{{ $etiqueta }}</label>
-                            <p class="form-control-plaintext fw-semibold">
-                                {{ $info->$campo !== null
-                                    ? '$ ' . number_format($info->$campo, 2, ',', '.')
-                                    : '—' }}
-                            </p>
-                        </div>
-                    @endforeach
-
-                </div>
-            </div>
+        <div class="card-body">
+            @if($contratosInactivos->isNotEmpty())
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Inicio de Contrato</th>
+                            <th>Finalización de Contrato</th>
+                            <th>Cargo</th>
+                            <th>Salario Básico</th>
+                            <th>Motivo Inactivación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($contratosInactivos as $inactivo)
+                            <tr>
+                                <td>{{ $inactivo->empresa->nombre_empresa ?? '—' }}</td>
+                                <td>{{ $inactivo->inicio_contrato
+                                        ? \Carbon\Carbon::parse($inactivo->inicio_contrato)->format('d/m/Y')
+                                        : '—' }}</td>
+                                <td>{{ $inactivo->finalizacion_contrato
+                                        ? \Carbon\Carbon::parse($inactivo->finalizacion_contrato)->format('d/m/Y')
+                                        : '—' }}</td>
+                                <td>{{ $inactivo->informacionAdicional->cargo ?? '—' }}</td>
+                                <td>{{ $inactivo->informacionAdicional->salario_basico
+                                        ? '$ ' . number_format($inactivo->informacionAdicional->salario_basico, 2, ',', '.')
+                                        : '—' }}</td>
+                                <td class="text-center">
+                                    @if($inactivo->motivo_inactivacion)
+                                        <span data-bs-toggle="tooltip"
+                                            data-bs-placement="top"
+                                            title="{{ $inactivo->motivo_inactivacion }}"
+                                            style="cursor: pointer;">
+                                            <i class="bi bi-chat-left-text text-secondary fs-5"></i>
+                                        </span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <p class="text-muted mb-0">No hay contratos inactivos registrados.</p>
+            @endif
         </div>
-
-    @else
-
-        {{-- Sin información adicional --}}
-        <div class="card mb-4">
-            <div class="card-body text-center text-muted py-4">
-                <i class="bi bi-clipboard2-x fs-2 mb-2 d-block"></i>
-                Este colaborador aún no tiene información adicional registrada.
-            </div>
-        </div>
-
-    @endif
-
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+
+<script>
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        new bootstrap.Tooltip(el);
+    });
+</script>
+
+@endpush
