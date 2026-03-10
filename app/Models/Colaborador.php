@@ -44,4 +44,10 @@ class Colaborador extends Model
     public function contratos(){
         return $this->hasMany(Contrato::class, 'id_colaborador');
     }
+
+    public function contratoActivo(){
+        return $this->contratos()
+            ->where('estado',1)
+            ->exists();
+    }
 }

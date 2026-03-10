@@ -21,7 +21,7 @@
                     <th>Tipo Identificación</th>
                     <th>Identificación</th>
                     <th>Nombre</th>
-                    <th>Empresa</th>
+                    <th>Telfonó Celular</th>
                     <th class ="text-center">Documentos</th>
                     <th class="text-center">Información Adicional</th>
                     <th class="text-center">Detalle</th>
@@ -40,7 +40,7 @@
                         </td>
 
                         <td>
-                            {{ $colaborador->empresa->nombre_empresa ?? 'Sin empresa' }}
+                            {{ $colaborador->telefono_celular ?? 'Sin empresa' }}
                         </td>
 
                         
@@ -55,7 +55,7 @@
 
                         {{-- Botón mutable Info Adicional --}}
                         <td class="text-center">
-                            @if($colaborador->informacionAdicional)
+                            @if($colaborador->contratoActivo())
                                 {{-- Ya tiene info adicional → botón editar --}}
                                 @if(in_array('colaboradores.editar', session('permisos_usuario', [])))
                                     <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
@@ -143,7 +143,7 @@
                     
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted">
+                        <td colspan="9" class="text-center text-muted">
                             No hay colaboradores registrados
                         </td>
                     </tr>

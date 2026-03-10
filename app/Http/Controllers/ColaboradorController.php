@@ -11,24 +11,22 @@ class ColaboradorController extends Controller
 {
     public function index()
     {
-        $colaboradores = Colaborador::with('empresa','identificacion')->get();
+        $colaboradores = Colaborador::with('identificacion')->get();
 
         return view('colaboradores.index',compact('colaboradores'));
     }
 
     public function create()
     {
-        $empresas = Empresa::where('estado',1)->get();
         $identificaciones = Identificacion::where('estado',1)->get();
 
-        return view('colaboradores.create', compact('empresas','identificaciones'));
+        return view('colaboradores.create', compact('identificaciones'));
         
     }
 
     public function store(Request $request){
 
         $request->validate([
-            'id_empresa' => 'required|exists:empresa,id_empresa',
             'id_tipo_identificacion' => 'required|exists:identificacion,id_identificacion',
     
             'numero_identificacion' => 'required|string|max:50|unique:colaborador,numero_identificacion',
@@ -58,7 +56,6 @@ class ColaboradorController extends Controller
         ]);
 
         Colaborador::create([
-            'id_empresa' => $request->id_empresa,
             'id_tipo_identificacion' => $request->id_tipo_identificacion,
             'numero_identificacion' => $request->numero_identificacion,
             'primer_nombre' => $request->primer_nombre,
@@ -84,13 +81,12 @@ class ColaboradorController extends Controller
 
     public function edit(Colaborador $colaborador)
     {
-        $empresas =Empresa::where('estado',1)->get();
+        
         $identificaciones =Identificacion::where('estado',1)->get();
 
         return view('colaboradores.edit',
         compact(
             'colaborador',
-            'empresas',
             'identificaciones'
         ));
     }
@@ -98,7 +94,6 @@ class ColaboradorController extends Controller
     public function update(Request $request, Colaborador $colaborador)
     {
         $request -> validate([
-            'id_empresa' => 'required|exists:empresa,id_empresa',
             'id_tipo_identificacion' => 'required|exists:identificacion,id_identificacion',
 
             'numero_identificacion' => 'required|string|max:50|unique:colaborador,numero_identificacion,' . $colaborador->id_colaborador . ',id_colaborador',
@@ -122,7 +117,6 @@ class ColaboradorController extends Controller
         ]);
 
         $colaborador->update($request->only([
-            'id_empresa',
             'id_tipo_identificacion',
             'numero_identificacion',
             'primer_nombre',

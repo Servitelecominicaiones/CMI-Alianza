@@ -26,7 +26,7 @@ class Contrato extends Model
         return $this->belongsTo(Colaborador::class, 'id_colaborador');
     }
 
-    public function informacionAcional(){
+    public function informacionAdicional(){
         return $this->belongsTo(InformacionAdicionalColaborador::class, 'id_informacion_adicional');
     }
 

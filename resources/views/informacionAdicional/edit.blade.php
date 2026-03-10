@@ -15,7 +15,7 @@
                 {{ $colaborador->primer_apellido }}
                 {{ $colaborador->segundo_apellido }}
                 &mdash; {{ $colaborador->numero_identificacion }}
-                &mdash; {{ $colaborador->empresa->nombre_empresa }}
+                &mdash; {{ $contrato->empresa->nombre_empresa }}
             </small>
         </div>
         <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">

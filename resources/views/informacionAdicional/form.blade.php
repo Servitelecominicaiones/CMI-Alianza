@@ -25,16 +25,23 @@
                 @enderror
             </div>
 
-            {{-- Medios de Transporte --}}
+            {{-- Empresa --}}
             <div class="col-md-6 mb-3">
-                <label class="form-label">Medios de Transporte</label>
-                <input type="number"
-                       name="medios_transporte"
-                       class="form-control @error('medios_transporte') is-invalid @enderror"
-                       value="{{ old('medios_transporte', $informacion->medios_transporte ?? '') }}">
-                @error('medios_transporte')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <label class="form-label">Empresa</label>
+            <select name="id_empresa"
+                    class="form-select @error('id_empresa') is-invalid @enderror"
+                    required>
+                <option value="">Seleccione una empresa</option>
+                @foreach($empresas as $empresa)
+                    <option value="{{ $empresa->id_empresa }}"
+                        {{ old('id_empresa', $contrato->id_empresa ?? null) == $empresa->id_empresa ? 'selected' : ''  }}>
+                        {{ $empresa->nombre_empresa }}
+                    </option>
+                @endforeach
+            </select>
+            @error('id_empresa')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
             </div>
 
             {{-- Fecha Inicial --}}
@@ -149,6 +156,18 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+            </div>
+
+            {{-- Medios de Transporte --}}
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Medios de Transporte</label>
+                <input type="number"
+                       name="medios_transporte"
+                       class="form-control @error('medios_transporte') is-invalid @enderror"
+                       value="{{ old('medios_transporte', $informacion->medios_transporte ?? '') }}">
+                @error('medios_transporte')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             {{-- Factor Prestacional --}}

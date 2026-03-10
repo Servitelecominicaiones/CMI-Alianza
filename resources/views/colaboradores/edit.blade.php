@@ -9,24 +9,6 @@
     <form id="formEditarColaborador" action="{{ route('colaboradores.update',$colaborador->id_colaborador) }}" method="POST">
         @csrf
         @method('PUT')
-        {{-- Empresa --}}
-        <div class="mb-3">
-            <label class="form-label">Empresa</label>
-            <select name="id_empresa"
-                    class="form-select @error('id_empresa') is-invalid @enderror"
-                    required>
-                <option value="">Seleccione una empresa</option>
-                @foreach($empresas as $empresa)
-                    <option value="{{ $empresa->id_empresa }}"
-                        {{ old('id_empresa', $colaborador->id_empresa) == $empresa->id_empresa ? 'selected' : ''  }}>
-                        {{ $empresa->nombre_empresa }}
-                    </option>
-                @endforeach
-            </select>
-            @error('id_empresa')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
 
         {{-- Tipo Identificación --}}
         <div class="mb-3">
