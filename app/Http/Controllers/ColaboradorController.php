@@ -186,8 +186,14 @@ class ColaboradorController extends Controller
     }
 
     public function detalle(Colaborador $colaborador)
-    {
-        $colaborador->load(['empresa', 'identificacion', 'informacionAdicional']);
-        return view('colaboradores.detalle', compact('colaborador'));
-    }
+{
+    $colaborador->load('identificacion');
+    
+    $contrato = $colaborador->contratos()
+        ->where('estado', 1)
+        ->with(['empresa', 'informacionAdicional'])
+        ->first();
+
+    return view('colaboradores.detalle', compact('colaborador', 'contrato'));
+}
 }

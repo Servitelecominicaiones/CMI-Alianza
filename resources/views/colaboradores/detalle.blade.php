@@ -15,7 +15,7 @@
                 {{ $colaborador->primer_apellido }}
                 {{ $colaborador->segundo_apellido }}
                 &mdash; {{ $colaborador->numero_identificacion }}
-                &mdash; {{ $colaborador->empresa->nombre_empresa ?? 'Sin empresa' }}
+                &mdash; {{ $contrato->empresa->nombre_empresa ?? 'Sin empresa' }}
             </small>
         </div>
         <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
@@ -38,7 +38,7 @@
                 <div class="col-md-4 mb-3">
                     <label class="form-label text-muted small">Empresa</label>
                     <p class="form-control-plaintext fw-semibold">
-                        {{ $colaborador->empresa->nombre_empresa ?? '—' }}
+                        {{ $contrato->empresa->nombre_empresa ?? '—' }}
                     </p>
                 </div>
 
@@ -161,9 +161,9 @@
          BLOQUE 2: Información Adicional
     ═══════════════════════════════════════════ --}}
 
-    @if($colaborador->informacionAdicional)
+    @if($contrato->informacionAdicional)
 
-        @php $info = $colaborador->informacionAdicional; @endphp
+        @php $info = $contrato->informacionAdicional; @endphp
 
         {{-- Cargo --}}
         <div class="card mb-4">
