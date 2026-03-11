@@ -5,6 +5,15 @@
 @section('content')
 <div class="container">
 
+    @php
+        $nombreCompleto = trim(
+            ($colaborador->primer_nombre ?? '') . ' ' .
+            ($colaborador->segundo_nombre ?? '') . ' ' .
+            ($colaborador->primer_apellido ?? '') . ' ' .
+            ($colaborador->segundo_apellido ?? '')
+        );
+    @endphp
+
     {{-- Encabezado --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -206,7 +215,7 @@
                                 {{-- Ver info adicional --}}
                                 <a href="{{ route('contrato.verInfo', $contratoActivo) }}"
                                    class="btn btn-sm btn-primary"
-                                   title="Ver información adicional"
+                                   title="Ver información Contrato"
                                    data-bs-toggle="tooltip">
                                     <i class="bi bi-eye"></i>
                                 </a>
@@ -214,7 +223,7 @@
                                 {{-- Editar info adicional --}}
                                 <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
                                    class="btn btn-sm btn-warning"
-                                   title="Editar información adicional"
+                                   title="Editar información Contrato"
                                    data-bs-toggle="tooltip">
                                     <i class="bi bi-pencil"></i>
                                 </a>
@@ -286,7 +295,7 @@
                                 <td class="text-center">
                                     <a href="{{ route('contrato.verInfo', $inactivo) }}"
                                     class="btn btn-sm btn-secondary"
-                                    title="Ver información adicional"
+                                    title="Ver información Contrato"
                                     data-bs-toggle="tooltip">
                                         <i class="bi bi-eye"></i>
                                     </a>
@@ -352,8 +361,8 @@
     @if(session('error'))
         Swal.fire({
             icon: 'error',
-            title: 'Error',
-            text: "{{ session('error') }}",
+            title: 'No se Puede Crear El Contrato',
+            text: "El colaborador {{ $nombreCompleto }} ya tiene un contrato activo",
             confirmButtonText: 'Entendido'
         });
     @endif

@@ -89,7 +89,7 @@
                                 <button type="button"
                                     class="btn btn-sm btn-danger btn-inactivar-contrato"
                                     data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
-                                    title="Inactivar colaborador">
+                                    title="Inactivar Contrato/Colaborador">
                                         <i class="bi bi-person-x"></i>
                                 </button>
                             @endif
