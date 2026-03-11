@@ -33,4 +33,8 @@ class Contrato extends Model
         return $this->belongsTo(InformacionAdicionalColaborador::class, 'id_informacion_adicional');
     }
 
+    public function documentos(){
+        return $this->morphMany(Documento::class, 'owner');
+    }
+
 }

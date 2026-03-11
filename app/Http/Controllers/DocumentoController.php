@@ -7,6 +7,7 @@ use App\Models\Area;
 use App\Models\Categoria;
 use App\Models\Empresa;
 use App\Models\Colaborador;
+use App\Models\Contrato;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -117,7 +118,8 @@ class DocumentoController extends Controller
             'areas' => Area::where('estado', 1)->get(),
             'categorias' => Categoria::where('estado', 1)->get(),
             'empresas' => Empresa::where('estado',1)->get(),
-            'colaboradores' => Colaborador::where('estado',1)->get()
+            'colaboradores' => Colaborador::where('estado',1)->get(),
+            'contratos' => Contrato::where('estado',1) -> with(['colaborador','empresa'])->get()
         ]);
     }
 
@@ -129,9 +131,10 @@ class DocumentoController extends Controller
             'categoria_id'  => 'required|exists:categorias,id',
             'area_id'       => 'required|exists:areas,id',
             'descripcion'   => 'nullable|string',
-            'tipo_propietario' => 'nullable|in:empresa,colaborador',
+            'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato|',
             'empresa_id' => 'required_if:tipo_propietario,empresa|nullable|exists:empresa,id_empresa',
-            'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador'
+            'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador',
+            'contrato_id' => 'required_if:tipo_propietario,contrato|nullable|exists:contratos,id_contrato'
         ]);
 
         /* ===== ARCHIVO ===== */
@@ -165,6 +168,12 @@ class DocumentoController extends Controller
                 $ownerId = $request->colaborador_id;
                 $colaborador = Colaborador::findOrFail($ownerId);
                 $identificador = $colaborador->numero_identificacion;
+            }elseif ($request-> tipo_propietario === 'contrato' && $request->filled('contrato_id')){
+                $ownerType = 'contrato';
+                $ownerId = $request->contrato_id;
+                $contrato = Contrato::with('colaborador')->findOrFail($ownerId);
+                $identificador = $contrato->colaborador->numero_identificacion;
+
             }
         }
 
@@ -299,7 +308,8 @@ class DocumentoController extends Controller
             'areas' => Area::where('estado', 1)->get(),
             'categorias' => Categoria::where('estado', 1)->get(),
             'empresas' => Empresa::where('estado',1)->get(),
-            'colaboradores' => Colaborador::where('estado',1)->get()
+            'colaboradores' => Colaborador::where('estado',1)->get(),
+            'contratos' => Contrato::where('estado',1)->with(['colaborador','empresa'])->get()
         ]);
     }
 
@@ -309,9 +319,10 @@ class DocumentoController extends Controller
             'area_id' => 'required',
             'categoria_id' => 'required',
             'descripcion' => 'nullable|string',
-            'tipo_propietario' => 'nullable|in:empresa,colaborador',
+            'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato',
             'empresa_id' => 'required_if:tipo_propietario,empresa|nullable|exists:empresa,id_empresa',
-            'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador'
+            'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador',
+            'contrato_id' => 'required_if_:tipo_prioietario,contrato|nullable|exits:contratos,id_contrato'
         ]);
 
         DB::beginTransaction();
@@ -337,6 +348,12 @@ class DocumentoController extends Controller
                     $ownerId = $request->colaborador_id;
                     $colaboradorNuevo = Colaborador::findOrFail($ownerId);
                     $identificador = $colaboradorNuevo -> numero_identificacion;
+                }elseif($request->tipo_propietario === 'colaborador' && $request->filled('contrato_id')){
+                    $ownerType = 'contrato';
+                    $ownerId = $request -> id_contrato;
+                    $contrato = Contrato::where('estado',1)->with(['colaborador'])->findOrFail($ownerId);
+                    $identificador = $contrato->colaborador->numerro_identificacion;
+
                 }
             }
 
