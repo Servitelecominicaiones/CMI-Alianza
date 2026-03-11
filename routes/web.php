@@ -356,14 +356,18 @@ Route::middleware(['auth'])->group(function () {
     */
 
     Route::get('colaboradores/{colaborador}/contrato/modal-inactivar', [ContratoController::class, 'inactivarModal'])
-    ->name('contrato.modal-inactivar')
-    ->Middleware('permission:colaboradores.eliminar');
+        ->name('contrato.modal-inactivar')
+        ->Middleware('permission:colaboradores.eliminar');
 
     Route::put('colaboradores/{colaborador}/contrato/inactivar', [ContratoController::class, 'inactivar'])
-    ->name('contrato.inactivar')
-    ->Middleware('permission:colaboradores.eliminar');
+        ->name('contrato.inactivar')
+        ->Middleware('permission:colaboradores.eliminar');
 
     Route::get('contratos/{contrato}/info', [ContratoController::class, 'verInfo'])
-    ->name('contrato.verInfo')
-    ->Middleware('permission:colaboradores.ver');
+        ->name('contrato.verInfo')
+        ->Middleware('permission:colaboradores.ver');
+
+    Route::get('contratos/{contrato}/documentos',[ContratoController::class , 'documentos'])
+        ->name('contratos.documentos')
+        ->Middleware('permission:colaboradores.ver');
 });

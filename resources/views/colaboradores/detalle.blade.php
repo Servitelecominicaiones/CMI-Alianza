@@ -183,64 +183,76 @@
         </div>
         <div class="card-body">
             @if($contratoActivo)
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Inicio de Contrato</th>
-                            <th>Finalización de Contrato</th>
-                            {{-- info adicional: --}}
-                            <th>Cargo</th>
-                            <th>Salario Básico</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{ $contratoActivo->empresa->nombre_empresa ?? '—' }}</td>
-                            <td>{{ $contratoActivo->inicio_contrato
-                                    ? \Carbon\Carbon::parse($contratoActivo->inicio_contrato)->format('d/m/Y')
-                                    : '—' }}</td>
-                            <td>{{ $contratoActivo->finalizacion_contrato
-                                    ? \Carbon\Carbon::parse($contratoActivo->finalizacion_contrato)->format('d/m/Y')
-                                    : '—' }}</td>
-                            {{-- Datos de informacionAdicional --}}
-                            <td>{{ $contratoActivo->informacionAdicional->cargo ?? '—' }}</td>
-                            <td>{{ $contratoActivo->informacionAdicional->salario_basico
-                                    ? '$ ' . number_format($contratoActivo->informacionAdicional->salario_basico, 2, ',', '.')
-                                    : '—' }}</td>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Empresa</th>
+                                <th class="text-center">Inicio de Contrato</th>
+                                <th class="text-center">Finalización de Contrato</th>
+                                {{-- info adicional: --}}
+                                <th class="text-center">Cargo</th>
+                                <th class="text-center">Salario Básico</th>
+                                <th class="text-center">Documentos</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ $contratoActivo->empresa->nombre_empresa ?? '—' }}</td>
+                                <td class="text-center">{{ $contratoActivo->inicio_contrato
+                                        ? \Carbon\Carbon::parse($contratoActivo->inicio_contrato)->format('d/m/Y')
+                                        : '—' }}</td>
+                                <td class="text-center">{{ $contratoActivo->finalizacion_contrato
+                                        ? \Carbon\Carbon::parse($contratoActivo->finalizacion_contrato)->format('d/m/Y')
+                                        : '—' }}</td>
+                                {{-- Datos de informacionAdicional --}}
+                                <td class="text-center">{{ $contratoActivo->informacionAdicional->cargo ?? '—' }}</td>
+                                <td class="text-center">{{ $contratoActivo->informacionAdicional->salario_basico
+                                        ? '$ ' . number_format($contratoActivo->informacionAdicional->salario_basico, 2, ',', '.')
+                                        : '—' }}</td>
 
-                            <td class="text-center d-flex gap-2 justify-content-center">
-                            
-                                {{-- Ver info adicional --}}
-                                <a href="{{ route('contrato.verInfo', $contratoActivo) }}"
-                                   class="btn btn-sm btn-primary"
-                                   title="Ver información Contrato"
-                                   data-bs-toggle="tooltip">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                            
-                                {{-- Editar info adicional --}}
-                                <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
-                                   class="btn btn-sm btn-warning"
-                                   title="Editar información Contrato"
-                                   data-bs-toggle="tooltip">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                            
-                                {{-- Inactivar contrato --}}
-                                <button type="button"
-                                        class="btn btn-sm btn-danger btn-inactivar-contrato"
-                                        data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
-                                        title="Inactivar contrato"
-                                        data-bs-toggle="tooltip">
-                                    <i class="bi bi-file-earmark-x"></i>
-                                </button>
-                            
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                {{-- Boton Ver Documentos --}}
+                                <td class = "text-center">
+                                    <a href="{{ route('contratos.documentos', $contratoActivo) }}" 
+                                        class="btn btn-sm btn-info"
+                                        title="Ver documentos del colaborador">
+                                        <i class="bi bi-file-earmark-text"></i> 
+                                    </a>
+                                </td>
+
+                                <td class="text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        {{-- Ver info adicional --}}
+                                        <a href="{{ route('contrato.verInfo', $contratoActivo) }}"
+                                           class="btn btn-sm btn-primary"
+                                           title="Ver información Contrato"
+                                           data-bs-toggle="tooltip">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    
+                                        {{-- Editar info adicional --}}
+                                        <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
+                                           class="btn btn-sm btn-warning"
+                                           title="Editar información Contrato"
+                                           data-bs-toggle="tooltip">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    
+                                        {{-- Inactivar contrato --}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger btn-inactivar-contrato"
+                                                data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
+                                                title="Inactivar contrato"
+                                                data-bs-toggle="tooltip">
+                                            <i class="bi bi-file-earmark-x"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             @else
                 <p class="text-muted mb-0">Este colaborador no tiene un contrato activo.</p>
             @endif
@@ -254,56 +266,68 @@
         </div>
         <div class="card-body">
             @if($contratosInactivos->isNotEmpty())
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Inicio de Contrato</th>
-                            <th>Finalización de Contrato</th>
-                            <th>Cargo</th>
-                            <th>Salario Básico</th>
-                            <th>Motivo Inactivación</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($contratosInactivos as $inactivo)
+                <div class = "table-responsive">
+                    <table class="table table-striped table-hover align-middle"style="white-space: nowrap;">
+                        <thead class="table-dark">
                             <tr>
-                                <td>{{ $inactivo->empresa->nombre_empresa ?? '—' }}</td>
-                                <td>{{ $inactivo->inicio_contrato
-                                        ? \Carbon\Carbon::parse($inactivo->inicio_contrato)->format('d/m/Y')
-                                        : '—' }}</td>
-                                <td>{{ $inactivo->finalizacion_contrato
-                                        ? \Carbon\Carbon::parse($inactivo->finalizacion_contrato)->format('d/m/Y')
-                                        : '—' }}</td>
-                                <td>{{ $inactivo->informacionAdicional->cargo ?? '—' }}</td>
-                                <td>{{ $inactivo->informacionAdicional->salario_basico
-                                        ? '$ ' . number_format($inactivo->informacionAdicional->salario_basico, 2, ',', '.')
-                                        : '—' }}</td>
-                                <td class="text-center">
-                                    @if($inactivo->motivo_inactivacion)
-                                        <span data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            title="{{ $inactivo->motivo_inactivacion }}"
-                                            style="cursor: pointer;">
-                                            <i class="bi bi-chat-left-text text-secondary fs-5"></i>
-                                        </span>
-                                    @else
-                                        —
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    <a href="{{ route('contrato.verInfo', $inactivo) }}"
-                                    class="btn btn-sm btn-secondary"
-                                    title="Ver información Contrato"
-                                    data-bs-toggle="tooltip">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </td>
+                                <th>Empresa</th>
+                                <th>Inicio de Contrato</th>
+                                <th>Finalización de Contrato</th>
+                                <th>Cargo</th>
+                                <th>Salario Básico</th>
+                                <th>Documentos</th>
+                                <th>Motivo Inactivación</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($contratosInactivos as $inactivo)
+                                <tr>
+                                    <td>{{ $inactivo->empresa->nombre_empresa ?? '—' }}</td>
+                                    <td class="text-center">{{ $inactivo->inicio_contrato
+                                            ? \Carbon\Carbon::parse($inactivo->inicio_contrato)->format('d/m/Y')
+                                            : '—' }}</td>
+                                    <td class="text-center">{{ $inactivo->finalizacion_contrato
+                                            ? \Carbon\Carbon::parse($inactivo->finalizacion_contrato)->format('d/m/Y')
+                                            : '—' }}</td>
+                                    <td>{{ $inactivo->informacionAdicional->cargo ?? '—' }}</td>
+                                    <td>{{ $inactivo->informacionAdicional->salario_basico
+                                            ? '$ ' . number_format($inactivo->informacionAdicional->salario_basico, 2, ',', '.')
+                                            : '—' }}</td>
+
+                                    {{-- Boton Ver Documentos --}}
+                                    <td class = "text-center">
+                                        <a href="{{ route('contratos.documentos', $inactivo) }}" 
+                                            class="btn btn-sm btn-info"
+                                            title="Ver documentos del colaborador">
+                                            <i class="bi bi-file-earmark-text"></i> 
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($inactivo->motivo_inactivacion)
+                                            <span data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $inactivo->motivo_inactivacion }}"
+                                                style="cursor: pointer;">
+                                                <i class="bi bi-chat-left-text text-secondary fs-5"></i>
+                                            </span>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{{ route('contrato.verInfo', $inactivo) }}"
+                                        class="btn btn-sm btn-secondary"
+                                        title="Ver información Contrato"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @else
                 <p class="text-muted mb-0">No hay contratos inactivos registrados.</p>
             @endif
