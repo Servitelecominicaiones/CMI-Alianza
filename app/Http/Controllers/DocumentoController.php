@@ -231,9 +231,18 @@ class DocumentoController extends Controller
         ]);
 
         /* ===== RESPUESTA ===== */
+        
+        //Si viene desde el detalle del colaborador, redirigir de vuelta
+        if ($request->filled('redirect_colaborador')) {
+            return redirect()
+                ->route('colaboradores.detalle', $request->redirect_colaborador)
+                ->with('success', 'Documento cargado correctamente');
+        }
+
         return redirect()
             ->route('documentos.index')
             ->with('success', 'Documento cargado correctamente');
+    
     }
 
 
@@ -425,6 +434,17 @@ class DocumentoController extends Controller
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function createParaContrato(Contrato $contrato)
+    {
+        $contrato->load(['colaborador', 'empresa']);
+    
+        return view('documentos.partials.form-contrato', [
+            'contrato'   => $contrato,
+            'areas'      => Area::where('estado', 1)->get(),
+            'categorias' => Categoria::where('estado', 1)->get(),
+        ]);
     }
 
 }

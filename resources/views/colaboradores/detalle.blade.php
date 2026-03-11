@@ -233,10 +233,19 @@
                                     
                                         {{-- Editar info adicional --}}
                                         <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
-                                           class="btn btn-sm btn-warning"
-                                           title="Editar información Contrato"
-                                           data-bs-toggle="tooltip">
+                                        class="btn btn-sm btn-warning"
+                                        title="Editar información Contrato"
+                                        data-bs-toggle="tooltip">
                                             <i class="bi bi-pencil"></i>
+                                        </a>
+
+                                        {{-- Botón subir documento - dentro de las acciones del contrato activo --}}
+                                        <a href="#"
+                                        class="btn btn-sm btn-success btn-subir-documento"
+                                        data-url="{{ route('contratos.documentos.create', $contratoActivo) }}"
+                                        title="Subir documento"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-upload"></i>
                                         </a>
                                     
                                         {{-- Inactivar contrato --}}
@@ -335,8 +344,14 @@
     </div>
 </div>
 
+{{-- Modal Inactivar Contrato --}}
 <div class="modal fade" id="modalInactivarContrato" tabindex="-1">
     <div id="modalInactivarContratoContenido"></div>
+</div>
+
+{{-- Contenedor modal subir documento --}}
+<div class="modal fade" id="modalSubirDocumento" tabindex="-1">
+    <div id="modalSubirDocumentoContenido"></div>
 </div>
 
 @endsection
@@ -381,6 +396,50 @@
         });
     });
 
+    /** Modal crear Documento**/
+    document.querySelectorAll('.btn-subir-documento').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const url = this.dataset.url;
+        const contenedor = document.getElementById('modalSubirDocumentoContenido');
+
+        contenedor.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content p-4 text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 mb-0">Cargando formulario...</p>
+                </div>
+            </div>`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalSubirDocumento'));
+        modal.show();
+
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                contenedor.innerHTML = html;
+
+                // ✅ Ahora sí existe el elemento en el DOM
+                const inputArchivo = document.getElementById('archivoModal');
+                if (inputArchivo) {
+                    inputArchivo.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        document.getElementById('preview-modal').src = URL.createObjectURL(file);
+                        document.getElementById('preview-container-modal').classList.remove('d-none');
+                    });
+                }
+            })
+            .catch(() => {
+                contenedor.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content p-4 text-center text-danger">
+                            Error al cargar el formulario.
+                        </div>
+                    </div>`;
+            });
+        });
+    });
     /** Sweet alert para errores **/
     @if(session('error'))
         Swal.fire({

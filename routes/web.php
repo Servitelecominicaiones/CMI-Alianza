@@ -370,4 +370,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contratos/{contrato}/documentos',[ContratoController::class , 'documentos'])
         ->name('contratos.documentos')
         ->Middleware('permission:colaboradores.ver');
+
+    Route::get('contratos/{contrato}/documento/crear', [DocumentoController::class, 'createParaContrato'])
+    ->name('contratos.documentos.create')
+    ->Middleware('permission:colaboradores.crear');
 });
