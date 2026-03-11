@@ -24,11 +24,10 @@ class InformacionAdicionalController extends Controller
 
         // Si ya tiene info adicional, redirige al edit para evitar duplicados
         if ($colaborador->contratoActivo()) {
-            return redirect()->route('informacion_adicional.edit', $colaborador);
-        }
+            return redirect()->route('colaboradores.detalle', $colaborador)->with('error','No se puede iniciar otro contraro mientras el colaborador tenga uno activo');        }
 
         return view('informacionAdicional.create', compact('colaborador', 'empresas'));
-    }
+        }
 
     public function store(Request $request, Colaborador $colaborador)
     {

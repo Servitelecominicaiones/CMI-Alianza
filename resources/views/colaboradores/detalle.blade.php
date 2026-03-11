@@ -156,9 +156,16 @@
             </div>
         </div>
     </div>
+    
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ route('informacion_adicional.create', $colaborador) }}" class="btn btn-primary">
+            <i class="bi bi-file-earmark-plus"></i> Nuevo Contrato
+        </a>
+    </div>
+
 
     {{-- ══════════════════════════════════════════
-        BLOQUE 2: Lista de Contrartos
+        BLOQUE 2: Lista de Contratos
     ═══════════════════════════════════════════ --}}
     {{-- Contrato Activo --}}
     <div class="card mb-4">
@@ -304,10 +311,13 @@
 @push('scripts')
 
 <script>
+
+    //*Tool tip para tabla de usuarios inactivos*//
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
         new bootstrap.Tooltip(el);
     });
 
+    /*Asignacion y cargue de modal de inactivacion a traves de ajax */
     document.querySelectorAll('.btn-inactivar-contrato').forEach(btn => {
     btn.addEventListener('click', function () {
         const url = this.dataset.url;
@@ -337,6 +347,16 @@
             });
         });
     });
+
+    /** Sweet alert para errores **/
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: "{{ session('error') }}",
+            confirmButtonText: 'Entendido'
+        });
+    @endif
 </script>
 
 @endpush
