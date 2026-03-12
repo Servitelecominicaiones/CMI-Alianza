@@ -54,14 +54,6 @@
                         </span>
                     </p>
                 </div>
-
-                <div class="col-md-4 mb-3">
-                    <label class="form-label text-muted small">Total Colaboradores</label>
-                    <p class="form-control-plaintext fw-semibold">
-                        {{ $empresa->colaboradores->count() }}
-                    </p>
-                </div>
-
             </div>
         </div>
     </div>
@@ -90,49 +82,6 @@
                 </div>
 
             </div>
-        </div>
-    </div>
-
-    {{-- Colaboradores de la empresa --}}
-    <div class="card mb-4">
-        <div class="card-header bg-dark text-white">
-            <i class="bi bi-people me-2"></i> Colaboradores
-        </div>
-        <div class="card-body">
-            @if($empresa->colaboradores->isNotEmpty())
-                <table class="table table-striped table-hover align-middle mb-0">
-                    <thead class="table-secondary">
-                        <tr>
-                            <th>Identificación</th>
-                            <th>Nombre</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($empresa->colaboradores as $colaborador)
-                            <tr>
-                                <td>{{ $colaborador->numero_identificacion }}</td>
-                                <td>
-                                    {{ $colaborador->primer_nombre }}
-                                    {{ $colaborador->segundo_nombre }}
-                                    {{ $colaborador->primer_apellido }}
-                                    {{ $colaborador->segundo_apellido }}
-                                </td>
-                                <td>
-                                    <span class="badge {{ $colaborador->estado ? 'bg-success' : 'bg-secondary' }}">
-                                        {{ $colaborador->estado ? 'Activo' : 'Inactivo' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @else
-                <p class="text-center text-muted mb-0">
-                    <i class="bi bi-people fs-4 d-block mb-2"></i>
-                    Esta empresa no tiene colaboradores registrados.
-                </p>
-            @endif
         </div>
     </div>
 

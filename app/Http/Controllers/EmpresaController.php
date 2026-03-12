@@ -144,7 +144,6 @@ class EmpresaController extends Controller
 
     public function detalle(Empresa $empresa)
     {
-        $empresa->load('colaboradores');
         return view('empresas.detalle', compact('empresa'));
     }
 }
