@@ -10,7 +10,7 @@ class EmpresaController extends Controller
 {
     public function index()
     {
-        $empresas = Empresa::withCount('colaboradores')->get();
+        $empresas = Empresa::get();
         
         return view('empresas.index',compact('empresas'));
     }

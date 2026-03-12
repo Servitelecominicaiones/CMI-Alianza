@@ -199,7 +199,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{ $contratoActivo->empresa->nombre_empresa ?? '—' }}</td>
+                                <td class="">{{ $contratoActivo->empresa->nombre_empresa ?? '—' }}</td>
                                 <td class="text-center">{{ $contratoActivo->inicio_contrato
                                         ? \Carbon\Carbon::parse($contratoActivo->inicio_contrato)->format('d/m/Y')
                                         : '—' }}</td>
@@ -207,8 +207,8 @@
                                         ? \Carbon\Carbon::parse($contratoActivo->finalizacion_contrato)->format('d/m/Y')
                                         : '—' }}</td>
                                 {{-- Datos de informacionAdicional --}}
-                                <td class="text-center">{{ $contratoActivo->informacionAdicional->cargo ?? '—' }}</td>
-                                <td class="text-center">{{ $contratoActivo->informacionAdicional->salario_basico
+                                <td class="text-center text-nowrap">{{ $contratoActivo->informacionAdicional->cargo ?? '—' }}</td>
+                                <td class="text-end text-nowrap">{{ $contratoActivo->informacionAdicional->salario_basico
                                         ? '$ ' . number_format($contratoActivo->informacionAdicional->salario_basico, 2, ',', '.')
                                         : '—' }}</td>
 

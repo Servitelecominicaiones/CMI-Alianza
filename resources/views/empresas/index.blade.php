@@ -23,7 +23,6 @@
                     <th>Actividad</th>
                     <th>Dirección</th>
                     <th>Teléfono</th>
-                    <th class="text-center">Colaboradores</th>
                     <th class="text-center">Documentos</th>
                     <th>Detalle</th>
                     <th>Estado</th>
@@ -40,9 +39,6 @@
                             {{ $empresa->ciudad }} - {{ $empresa->direccion }} - {{ $empresa->barrio }}
                         </td>
                         <td>{{ $empresa->telefono }}</td>
-                        <td class="text-center">
-                            {{ $empresa->colaboradores_count }}
-                        </td>
 
                         {{-- Boton Ver Documentos --}}
                         <td class = "text-center">
