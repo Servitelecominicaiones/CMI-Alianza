@@ -65,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('documentos.preview')
         ->middleware('auth');
 
-    Route::put('documentos/{id}', [DocumentoController::class,'destroy'])
+    Route::delete('documentos/{id}', [DocumentoController::class,'destroy'])
         ->name('documentos.destroy')
         ->middleware('permission:documentos.eliminar');
 

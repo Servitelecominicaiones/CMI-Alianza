@@ -331,7 +331,7 @@ class DocumentoController extends Controller
             'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato',
             'empresa_id' => 'required_if:tipo_propietario,empresa|nullable|exists:empresa,id_empresa',
             'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador',
-            'contrato_id' => 'required_if_:tipo_prioietario,contrato|nullable|exits:contratos,id_contrato'
+            'contrato_id' => 'required_if:tipo_propietario,contrato|nullable|exists:contratos,id_contrato'
         ]);
 
         DB::beginTransaction();
@@ -357,12 +357,11 @@ class DocumentoController extends Controller
                     $ownerId = $request->colaborador_id;
                     $colaboradorNuevo = Colaborador::findOrFail($ownerId);
                     $identificador = $colaboradorNuevo -> numero_identificacion;
-                }elseif($request->tipo_propietario === 'colaborador' && $request->filled('contrato_id')){
-                    $ownerType = 'contrato';
-                    $ownerId = $request -> id_contrato;
-                    $contrato = Contrato::where('estado',1)->with(['colaborador'])->findOrFail($ownerId);
-                    $identificador = $contrato->colaborador->numerro_identificacion;
-
+                }elseif ($request->tipo_propietario === 'contrato' && $request->filled('contrato_id')) {
+                        $ownerType    = 'contrato';
+                        $ownerId      = $request->contrato_id;
+                        $contrato     = Contrato::with('colaborador')->findOrFail($ownerId);
+                        $identificador = $contrato->colaborador->numero_identificacion;
                 }
             }
 
