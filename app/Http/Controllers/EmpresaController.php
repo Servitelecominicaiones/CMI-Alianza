@@ -144,6 +144,17 @@ class EmpresaController extends Controller
 
     public function detalle(Empresa $empresa)
     {
-        return view('empresas.detalle', compact('empresa'));
+        $contratoActivo = $empresa->contratosEmpresa()
+            ->where('estado', 1)
+            ->with(['informacion_adicional_empresa'])
+            ->first();
+
+        $contratosInactivos = $empresa->contratosEmpresa()
+            ->where('estado', 0)
+            ->with(['informacion_adicional_empresa'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
+    
+        return view('empresas.detalle', compact('empresa', 'contratoActivo', 'contratosInactivos'));
     }
 }

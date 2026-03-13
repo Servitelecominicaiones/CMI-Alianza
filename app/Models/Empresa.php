@@ -34,4 +34,11 @@ class Empresa extends Model
     public function contratosEmpresa(){
         return $this->hasMany(ContratoEmpresa::class, 'id_empresa');
     }
+
+    public function contratoEmpresaActivo()
+    {
+        return $this->contratosEmpresa()
+            ->where('estado', 1)
+            ->exists();
+    }
 }

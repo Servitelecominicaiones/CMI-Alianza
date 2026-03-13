@@ -15,6 +15,7 @@ use App\Http\Controllers\ColaboradorController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\InformacionAdicionalController;
 use App\Http\Controllers\ContratoController;
+use App\Http\Controllers\ContratoEmpresaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -374,4 +375,38 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contratos/{contrato}/documento/crear', [DocumentoController::class, 'createParaContrato'])
     ->name('contratos.documentos.create')
     ->Middleware('permission:colaboradores.crear');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contratos Empresas
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('empresas/{empresa}/contrato/crear', [ContratoEmpresaController::class, 'create'])
+        ->name('contratosEmpresa.create')
+        ->middleware('permission:empresas.crear');
+
+    Route::post('empresas/{empresa}/contrato', [ContratoEmpresaController::class, 'store'])
+        ->name('contratosEmpresa.store')
+        ->middleware('permission:empresas.crear');
+
+    Route::get('empresas/{empresa}/contrato/editar', [ContratoEmpresaController::class, 'edit'])
+        ->name('contratosEmpresa.edit')
+        ->middleware('permission:empresas.editar');
+        
+    Route::put('empresas/{empresa}/contrato/actualizar', [ContratoEmpresaController::class, 'update'])
+        ->name('contratosEmpresa.update')
+        ->middleware('permission:empresas.editar');
+
+    Route::get('empresas/{empresa}/contrato/modal-inactivar', [ContratoEmpresaController::class, 'inactivarModal'])
+        ->name('contratosEmpresa.modal-inactivar')
+        ->middleware('permission:empresas.eliminar');
+
+    Route::put('empresas/{empresa}/contrato/inactivar', [ContratoEmpresaController::class, 'inactivar'])
+        ->name('contratosEmpresa.inactivar')
+        ->middleware('permission:empresas.eliminar');
+
+    Route::get('contrato-empresa/{contratoEmpresa}/info', [ContratoEmpresaController::class, 'verInfo'])
+        ->name('contratosEmpresa.verInfo')
+        ->middleware('permission:empresas.ver');
 });
