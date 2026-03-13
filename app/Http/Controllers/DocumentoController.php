@@ -8,6 +8,7 @@ use App\Models\Categoria;
 use App\Models\Empresa;
 use App\Models\Colaborador;
 use App\Models\Contrato;
+use App\Models\ContratoEmpresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -119,7 +120,8 @@ class DocumentoController extends Controller
             'categorias' => Categoria::where('estado', 1)->get(),
             'empresas' => Empresa::where('estado',1)->get(),
             'colaboradores' => Colaborador::where('estado',1)->get(),
-            'contratos' => Contrato::where('estado',1) -> with(['colaborador','empresa'])->get()
+            'contratos' => Contrato::where('estado',1) -> with(['colaborador','empresa','informacionAdicional'])->get(),
+            'contratosEmpresa' => ContratoEmpresa::where('estado',1)->with(['empresa','informacionAdicionalEmpresa'])->get()
         ]);
     }
 
@@ -131,10 +133,11 @@ class DocumentoController extends Controller
             'categoria_id'  => 'required|exists:categorias,id',
             'area_id'       => 'required|exists:areas,id',
             'descripcion'   => 'nullable|string',
-            'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato|',
+            'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato,contratoEmpresa|',
             'empresa_id' => 'required_if:tipo_propietario,empresa|nullable|exists:empresa,id_empresa',
             'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador',
-            'contrato_id' => 'required_if:tipo_propietario,contrato|nullable|exists:contratos,id_contrato'
+            'contrato_id' => 'required_if:tipo_propietario,contrato|nullable|exists:contratos,id_contrato',
+            'contrato_empresa_id' => 'required_if:tipo_propietario,contratoEmpresa|nullable|exists:contrato_empresa,id_contrato_empresa'
         ]);
 
         /* ===== ARCHIVO ===== */
@@ -174,6 +177,11 @@ class DocumentoController extends Controller
                 $contrato = Contrato::with('colaborador')->findOrFail($ownerId);
                 $identificador = $contrato->colaborador->numero_identificacion;
 
+            }elseif ($request->tipo_propietario === 'contratoEmpresa' && $request->filled('contrato_empresa_id')) {
+                $ownerType = 'contratoEmpresa';
+                $ownerId   = $request->contrato_empresa_id;
+                $contratoEmpresa = ContratoEmpresa::with('empresa')->findOrFail($ownerId);
+                $identificador   = $contratoEmpresa->empresa->nombre_empresa;
             }
         }
 
@@ -237,6 +245,10 @@ class DocumentoController extends Controller
             return redirect()
                 ->route('colaboradores.detalle', $request->redirect_colaborador)
                 ->with('success', 'Documento cargado correctamente');
+        }elseif ($request->filled('redirect_empresa')) {
+            return redirect()
+            ->route('empresas.detalle', $request->redirect_empresa)
+            ->with('success', 'Documento cargado correctamente');
         }
 
         return redirect()
@@ -318,7 +330,8 @@ class DocumentoController extends Controller
             'categorias' => Categoria::where('estado', 1)->get(),
             'empresas' => Empresa::where('estado',1)->get(),
             'colaboradores' => Colaborador::where('estado',1)->get(),
-            'contratos' => Contrato::where('estado',1)->with(['colaborador','empresa'])->get()
+            'contratos' => Contrato::where('estado',1)->with(['colaborador','empresa','informacionAdicional'])->get(),
+            'contratosEmpresa' => ContratoEmpresa::where('estado',1)->with(['empresa','informacionAdicionalEmpresa'])->get()
         ]);
     }
 
@@ -331,7 +344,8 @@ class DocumentoController extends Controller
             'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato',
             'empresa_id' => 'required_if:tipo_propietario,empresa|nullable|exists:empresa,id_empresa',
             'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador',
-            'contrato_id' => 'required_if:tipo_propietario,contrato|nullable|exists:contratos,id_contrato'
+            'contrato_id' => 'required_if:tipo_propietario,contrato|nullable|exists:contratos,id_contrato',
+            'contrato_empresa_id' => 'required_if:tipo_propietario,contratoEmpresa|nullable|exist:contrato_empresa,id_contrato_empresa'
         ]);
 
         DB::beginTransaction();
@@ -362,6 +376,11 @@ class DocumentoController extends Controller
                         $ownerId      = $request->contrato_id;
                         $contrato     = Contrato::with('colaborador')->findOrFail($ownerId);
                         $identificador = $contrato->colaborador->numero_identificacion;
+                }elseif ($request->tipo_propietario === 'contratoEmpresa' && $request->filled('contrato_empresa_id')) {
+                    $ownerType       = 'contratoEmpresa';
+                    $ownerId         = $request->contrato_empresa_id;
+                    $contratoEmpresa = ContratoEmpresa::with('empresa')->findOrFail($ownerId);
+                    $identificador   = $contratoEmpresa->empresa->nombre_empresa;
                 }
             }
 
@@ -443,6 +462,17 @@ class DocumentoController extends Controller
             'contrato'   => $contrato,
             'areas'      => Area::where('estado', 1)->get(),
             'categorias' => Categoria::where('estado', 1)->get(),
+        ]);
+    }
+
+    public function createParaContratoEmpresa(ContratoEmpresa $contratoEmpresa)
+    {
+        $contratoEmpresa->load(['empresa']);
+
+        return view('documentos.partials.form-contrato-empresa', [
+            'contratoEmpresa' => $contratoEmpresa,
+            'areas'           => Area::where('estado', 1)->get(),
+            'categorias'      => Categoria::where('estado', 1)->get(),
         ]);
     }
 

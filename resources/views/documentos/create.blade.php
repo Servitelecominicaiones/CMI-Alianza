@@ -67,10 +67,11 @@
                     <option value="">Documento General (Sin asignar)</option>
                     <option value="empresa">Empresa</option>
                     <option value="colaborador">Colaborador</option>
-                    <option value="contrato">Contrato</option>
+                    <option value="contrato">Contrato Colaborador</option>
+                    <option value="contratoEmpresa">Contrato Empresa</option>
                 </select>
                 <small class="text-muted">
-                    Opcional: Puede asignar este documento a una empresa o colaborador específico
+                    Puede asignar este documento a empresas,colaboradores o contratos específicos
                 </small>
             </div>
 
@@ -102,7 +103,7 @@
                 </select>
             </div>
 
-            {{-- Nuevo selector de contrato --}}
+            {{-- selector de contrato --}}
             <div class="mb-3" id="selector_contrato" style="display: none;">
                 <label class="form-label">Contrato <span class="text-danger">*</span></label>
                 <select name="contrato_id" id="contrato_id" class="form-select">
@@ -111,8 +112,24 @@
                         <option value="{{ $contrato->id_contrato }}">
                             {{ $contrato->colaborador->primer_nombre }}
                             {{ $contrato->colaborador->primer_apellido }}
+                            — {{ $contrato->colaborador->numero_identificacion }}
                             — {{ $contrato->empresa->nombre_empresa }}
-                            — {{ $contrato -> inicio_contrato }}
+                            — {{ $contrato->informacionAdicional->cargo }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Selector Contrato Empresa --}}
+            <div class="mb-3" id="selector_contrato_empresa" style="display: none;">
+                <label class="form-label">Contrato Empresa <span class="text-danger">*</span></label>
+                <select name="contrato_empresa_id" id="contrato_empresa_id" class="form-select">
+                    <option value="">-- Seleccione un contrato --</option>
+                    @foreach($contratosEmpresa as $contratoEmpresa)
+                        <option value="{{ $contratoEmpresa->id_contrato_empresa }}">
+                            {{ $contratoEmpresa->empresa->nombre_empresa }} 
+                            - Inicio Contrato: {{ $contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato}}
+                            - Finalizacion Contrato: {{ $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato }}
                         </option>
                     @endforeach
                 </select>
@@ -163,25 +180,33 @@ document.getElementById('tipo_propietario').addEventListener('change', function(
     
     const selectorEmpresa = document.getElementById('selector_empresa');
     const selectorColaborador = document.getElementById('selector_colaborador');
+    
     const selectEmpresa = document.getElementById('empresa_id');
     const selectColaborador = document.getElementById('colaborador_id');
+    
     const selectorContrato = document.getElementById('selector_contrato');
     const selectContrato   = document.getElementById('contrato_id');
     
-    // Ocultar ambos selectores
+    const selectorContratoEmpresa = document.getElementById('selector_contrato_empresa');
+    const selectContratoEmpresa = document.getElementById('contrato_empresa_id');
+
+    // Ocultar selectores
     selectorEmpresa.style.display = 'none';
     selectorColaborador.style.display = 'none';
     selectorContrato.style.display = 'none';
-    
+    selectorContratoEmpresa.style.display = 'none';
+
     // Limpiar selecciones previas
     selectEmpresa.value = '';
     selectColaborador.value = '';
     selectContrato.value = '';
+    selectContratoEmpresa.value = '';
 
     // Remover atributo required de ambos
     selectEmpresa.removeAttribute('required');
     selectColaborador.removeAttribute('required');
     selectContrato.removeAttribute('required');
+    selectContratoEmpresa.removeAttribute('required');
 
     // Mostrar el selector correspondiente y hacerlo requerido
     if (tipo === 'empresa') {
@@ -193,6 +218,9 @@ document.getElementById('tipo_propietario').addEventListener('change', function(
     }else if (tipo === 'contrato') {
         selectorContrato.style.display = 'block';
         selectContrato.setAttribute('required', 'required');
+    }else if (tipo === 'contratoEmpresa'){
+        selectorContratoEmpresa.style.display = 'block';
+        selectContratoEmpresa.setAttribute('required','required');
     }
 });
 

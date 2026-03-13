@@ -409,4 +409,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contrato-empresa/{contratoEmpresa}/info', [ContratoEmpresaController::class, 'verInfo'])
         ->name('contratosEmpresa.verInfo')
         ->middleware('permission:empresas.ver');
+    
+    // Ver documentos de un contrato empresa
+    Route::get('contrato-empresa/{contratoEmpresa}/documentos', [ContratoEmpresaController::class, 'documentos'])
+        ->name('contratosEmpresa.documentos')
+        ->middleware('permission:empresas.ver');
+
+    // Modal subir documento a un contrato empresa
+    Route::get('contrato-empresa/{contratoEmpresa}/documento/crear', [DocumentoController::class, 'createParaContratoEmpresa'])
+        ->name('contratosEmpresa.documentos.create')
+        ->middleware('permission:empresas.crear');
 });

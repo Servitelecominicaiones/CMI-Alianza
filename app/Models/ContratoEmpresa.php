@@ -21,7 +21,11 @@ class ContratoEmpresa extends Model
         return $this->belongsTo(Empresa::class, 'id_empresa');
     }
 
-    public function informacion_adicional_empresa(){
+    public function informacionAdicionalEmpresa(){
         return $this->belongsTo(InformacionAdicionalEmpresa::class, 'id_informacion_adicional_empresa');
+    }
+
+    public function documentos(){
+        return $this->morphMany(Documento::class, 'owner');
     }
 }

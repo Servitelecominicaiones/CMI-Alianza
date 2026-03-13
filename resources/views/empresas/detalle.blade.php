@@ -105,6 +105,7 @@
                             <tr>
                                 <th>Inicio de Contrato</th>
                                 <th>Finalización de Contrato</th>
+                                <th class="text-center">Documentos</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -116,15 +117,28 @@
                                 <td>{{ $contratoActivo->informacion_adicional_empresa->finalizacion_contrato
                                         ? \Carbon\Carbon::parse($contratoActivo->informacion_adicional_empresa->finalizacion_contrato)->format('d/m/Y')
                                         : '—' }}</td>
+                                
+                                {{-- Ver documentos --}}
+                                <td class="text-center">
+                                    <a href="{{ route('contratosEmpresa.documentos', $contratoActivo) }}"
+                                       class="btn btn-sm btn-info"
+                                       title="Ver documentos del contrato"
+                                       data-bs-toggle="tooltip">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </a>
+                                </td>
+
                                 <td class="text-center">
                                     <div class="d-flex gap-2 justify-content-center">
-
-                                        <a href="{{ route('contratosEmpresa.verInfo', $empresa) }}"
+                                        
+                                        {{-- Ver informacion --}}
+                                        <a href="{{ route('contratosEmpresa.verInfo', $contratoActivo) }}"
                                            class="btn btn-sm btn-primary"
                                            title="Ver información del contrato"
                                            data-bs-toggle="tooltip">
                                             <i class="bi bi-eye"></i>
                                         </a>
+                                        
 
                                         {{-- Editar contrato --}}
                                         <a href="{{ route('contratosEmpresa.edit', $empresa) }}"
@@ -133,6 +147,15 @@
                                            data-bs-toggle="tooltip">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+
+                                        {{-- Subir documento --}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-success btn-subir-documento-empresa"
+                                                data-url="{{ route('contratosEmpresa.documentos.create', $contratoActivo) }}"
+                                                title="Subir documento"
+                                                data-bs-toggle="tooltip">
+                                            <i class="bi bi-upload"></i>
+                                        </button>
 
                                         {{-- Inactivar contrato --}}
                                         <button type="button"
@@ -168,6 +191,7 @@
                             <tr>
                                 <th>Inicio de Contrato</th>
                                 <th>Finalización de Contrato</th>
+                                <th class="text-center">Documentos</th>
                                 <th class="text-center">Motivo Inactivación</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
@@ -181,6 +205,16 @@
                                     <td>{{ $inactivo->informacion_adicional_empresa->finalizacion_contrato
                                             ? \Carbon\Carbon::parse($inactivo->informacion_adicional_empresa->finalizacion_contrato)->format('d/m/Y')
                                             : '—' }}</td>
+
+                                    <td class = 'text-center'>
+                                        {{-- Ver documentos --}}
+                                        <a href="{{ route('contratosEmpresa.documentos', $inactivo) }}"
+                                           class="btn btn-sm btn-info"
+                                           title="Ver documentos del contrato"
+                                           data-bs-toggle="tooltip">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        </a>
+                                    </td>
                                     <td class="text-center">
                                         @if($inactivo->motivo_inactivacion)
                                             <span data-bs-toggle="tooltip"
@@ -194,6 +228,7 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
+
                                         {{-- Ver info contrato inactivo --}}
                                         <a href="{{ route('contratosEmpresa.verInfo', $inactivo) }}"
                                            class="btn btn-sm btn-secondary"
@@ -218,6 +253,11 @@
 {{-- Modal inactivar contrato --}}
 <div class="modal fade" id="modalInactivarContratoEmpresa" tabindex="-1">
     <div id="modalInactivarContratoEmpresaContenido"></div>
+</div>
+
+{{-- Modal subir documento --}}
+<div class="modal fade" id="modalSubirDocumentoEmpresa" tabindex="-1">
+    <div id="modalSubirDocumentoEmpresaContenido"></div>
 </div>
 
 @endsection
@@ -269,6 +309,50 @@
             text: "{{ session('error') }}",
             confirmButtonColor: '#d33'
         });
-@endif
+    @endif
+
+    /* Modal para subir documento */
+    document.querySelectorAll('.btn-subir-documento-empresa').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const url = this.dataset.url;
+            const contenedor = document.getElementById('modalSubirDocumentoEmpresaContenido');
+
+            contenedor.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content p-4 text-center">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 mb-0">Cargando formulario...</p>
+                    </div>
+                </div>`;
+
+            const modal = new bootstrap.Modal(document.getElementById('modalSubirDocumentoEmpresa'));
+            modal.show();
+
+            fetch(url)
+                .then(res => res.text())
+                .then(html => {
+                    contenedor.innerHTML = html;
+
+                    // Registrar listener del input archivo una vez el modal está en el DOM
+                    const inputArchivo = document.getElementById('archivoModalEmpresa');
+                    if (inputArchivo) {
+                        inputArchivo.addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            document.getElementById('preview-modal-empresa').src = URL.createObjectURL(file);
+                            document.getElementById('preview-container-modal-empresa').classList.remove('d-none');
+                        });
+                    }
+                })
+                .catch(() => {
+                    contenedor.innerHTML = `
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content p-4 text-center text-danger">
+                                Error al cargar el formulario.
+                            </div>
+                        </div>`;
+                });
+        });
+    });
 </script>
 @endpush

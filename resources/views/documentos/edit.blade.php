@@ -57,7 +57,10 @@
                     Colaborador
                 </option>
                 <option value="contrato" {{ $documento->owner_type === 'contrato' ? 'selected' : '' }}>
-                    Contrato
+                    Contrato Colaborador
+                </option>
+                <option value="contratoEmpresa" {{ $documento->owner_type === 'contratoEmpresa' ? 'selected' : '' }}>
+                    Contrato Empresa
                 </option>
             </select>
             <small class="text-muted">
@@ -79,7 +82,7 @@
             </select>
         </div>
 
-        {{-- ========== NUEVO: SELECTOR DE COLABORADOR ========== --}}
+        {{-- ========== SELECTOR DE COLABORADOR ========== --}}
         <div class="mb-3" id="selector_colaborador" style="display: {{ $documento->owner_type === 'colaborador' ? 'block' : 'none' }};">
             <label class="form-label">Colaborador <span class="text-danger">*</span></label>
             <select name="colaborador_id" id="colaborador_id" class="form-select">
@@ -95,7 +98,7 @@
             </select>
         </div>
 
-        {{-- Nuevo selector de contrato --}}
+        {{-- selector de contrato Colaborador --}}
         <div class="mb-3" id="selector_contrato" style="display: {{ $documento->owner_type === 'contrato' ? 'block' : 'none' }};">
             <select name="contrato_id" id="contrato_id" class="form-select">
                 <option value="">-- Seleccione un contrato --</option>
@@ -104,12 +107,29 @@
                         {{ $documento->owner_type === 'contrato' && $documento->owner_id == $contrato->id_contrato ? 'selected' : '' }}>
                         {{ $contrato->colaborador->primer_nombre }}
                         {{ $contrato->colaborador->primer_apellido }}
+                        — {{ $contrato->colaborador->numero_identificacion }}
                         — {{ $contrato->empresa->nombre_empresa }}
+                        — {{ $contrato->informacionAdicional->cargo }}
                     </option>
                 @endforeach
             </select>
         </div>
 
+        {{-- ========== SELECTOR CONTRATO EMPRESA ========== --}}
+        <div class="mb-3" id="selector_contrato_empresa" style="display: {{ $documento->owner_type === 'contratoEmpresa' ? 'block' : 'none' }};">
+            <label class="form-label">Contrato Empresa <span class="text-danger">*</span></label>
+            <select name="contrato_empresa_id" id="contrato_empresa_id" class="form-select">
+                <option value="">-- Seleccione un contrato --</option>
+                @foreach($contratosEmpresa as $contratoEmpresa)
+                    <option value="{{ $contratoEmpresa->id_contrato_empresa }}"
+                        {{ $documento->owner_type === 'contratoEmpresa' && $documento->owner_id == $contratoEmpresa->id_contrato_empresa ? 'selected' : '' }}>
+                        {{ $contratoEmpresa->empresa->nombre_empresa }}
+                            - Inicio Contrato: {{ $contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato}}
+                            - Finalizacion Contrato: {{ $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
         <div class="mb-3">
             <label class="form-label">Descripción</label>
@@ -138,25 +158,33 @@ document.getElementById('tipo_propietario').addEventListener('change', function(
     
     const selectorEmpresa = document.getElementById('selector_empresa');
     const selectorColaborador = document.getElementById('selector_colaborador');
+    
     const selectEmpresa = document.getElementById('empresa_id');
     const selectColaborador = document.getElementById('colaborador_id');
+    
     const selectorContrato = document.getElementById('selector_contrato');
     const selectContrato   = document.getElementById('contrato_id');
 
-    // Ocultar ambos selectores
+    const selectorContratoEmpresa = document.getElementById('selector_contrato_empresa');
+    const selectContratoEmpresa = document.getElementById('contrato_empresa_id');
+
+    // Ocultar selectores
     selectorEmpresa.style.display = 'none';
     selectorColaborador.style.display = 'none';
-    selectorContrato.style.display = 'none'
+    selectorContrato.style.display = 'none';
+    selectorContratoEmpresa.style.display = 'none';
 
     // Limpiar selecciones previas
     selectEmpresa.value = '';
     selectColaborador.value = '';
     selectContrato.value = '';
+    selectContratoEmpresa.value = '';
     
     // Remover atributo required de los elementos
     selectEmpresa.removeAttribute('required');
     selectColaborador.removeAttribute('required');
     selectContrato.removeAttribute('required');
+    selectContratoEmpresa.removeAttribute('required');
 
     // Mostrar el selector correspondiente y hacerlo requerido
     if (tipo === 'empresa') {
@@ -168,6 +196,9 @@ document.getElementById('tipo_propietario').addEventListener('change', function(
     } else if (tipo === 'contrato') {
         selectorContrato.style.display = 'block';
         selectContrato.setAttribute('required', 'required');
+    }else if (tipo === 'contratoEmpresa'){
+        selectorContratoEmpresa.style.display = 'block';
+        selectContratoEmpresa.setAttribute('required','required');
     }
 });
 </script>

@@ -113,10 +113,45 @@ class ContratoEmpresaController extends Controller
         return view('contratosEmpresa.edit', compact('empresa', 'contrato', 'informacion'));
     }
 
+    public function update(Request $request, Empresa $empresa)
+    {
+        $contrato = $empresa->contratosEmpresa()
+            ->where('estado', 1)
+            ->with('informacion_adicional_empresa')
+            ->first();
+
+        if (!$contrato) {
+            return redirect()
+                ->route('contratosEmpresa.create', $empresa);
+        }
+
+        $validated = $request->validate([
+            'inicio_contrato'      => 'required|date',
+            'finalizacion_contrato' => 'nullable|date|after_or_equal:inicio_contrato',
+        ]);
+
+        $contrato->informacion_adicional_empresa->update($validated);
+
+        return redirect()
+            ->route('empresas.detalle', $empresa);
+    }
+
     public function verInfo(ContratoEmpresa $contratoEmpresa)
     {
         $contratoEmpresa->load(['informacion_adicional_empresa', 'empresa']);
         return view('contratosEmpresa.ver-info', compact('contratoEmpresa'));
+    }
+
+    public function documentos(ContratoEmpresa $contratoEmpresa)
+    {
+        $contratoEmpresa->load(['empresa', 'informacion_adicional_empresa']);
+    
+        $documentos = $contratoEmpresa->documentos()
+            ->with(['categoria', 'area', 'usuario'])
+            ->orderByDesc('created_at')
+            ->get();
+    
+        return view('contratosEmpresa.documentos', compact('contratoEmpresa', 'documentos'));
     }
     
 }
