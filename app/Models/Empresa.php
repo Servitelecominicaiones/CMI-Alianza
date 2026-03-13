@@ -30,4 +30,8 @@ class Empresa extends Model
     public function contratos(){
         return $this-> hasMany(Contrato::class, 'id_empresa');
     }
+
+    public function contratosEmpresa(){
+        return $this->hasMany(ContratoEmpresa::class, 'id_empresa');
+    }
 }
