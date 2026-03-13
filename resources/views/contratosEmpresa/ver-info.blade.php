@@ -32,8 +32,8 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label text-muted small">Fecha de Inicio</label>
                     <p class="form-control-plaintext fw-semibold">
-                        {{ $contratoEmpresa->informacion_adicional_empresa->inicio_contrato
-                            ? \Carbon\Carbon::parse($contratoEmpresa->informacion_adicional_empresa->inicio_contrato)->format('d/m/Y')
+                        {{ $contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato
+                            ? \Carbon\Carbon::parse($contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato)->format('d/m/Y')
                             : '—' }}
                     </p>
                 </div>
@@ -41,8 +41,8 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label text-muted small">Fecha de Finalización</label>
                     <p class="form-control-plaintext fw-semibold">
-                        {{ $contratoEmpresa->informacion_adicional_empresa->finalizacion_contrato
-                            ? \Carbon\Carbon::parse($contratoEmpresa->informacion_adicional_empresa->finalizacion_contrato)->format('d/m/Y')
+                        {{ $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato
+                            ? \Carbon\Carbon::parse($contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato)->format('d/m/Y')
                             : '—' }}
                     </p>
                 </div>

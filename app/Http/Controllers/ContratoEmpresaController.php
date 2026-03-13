@@ -57,7 +57,7 @@ class ContratoEmpresaController extends Controller
     {
         $contrato = $empresa->contratosEmpresa()
             ->where('estado', 1)
-            ->with('informacion_adicional_empresa')
+            ->with('informacionAdicionalEmpresa')
             ->first();
 
         if (!$contrato) {
@@ -100,7 +100,7 @@ class ContratoEmpresaController extends Controller
     {
         $contrato = $empresa->contratosEmpresa()
             ->where('estado', 1)
-            ->with('informacion_adicional_empresa')
+            ->with('informacionAdicionalEmpresa')
             ->first();
 
         if (!$contrato) {
@@ -108,7 +108,7 @@ class ContratoEmpresaController extends Controller
                 ->route('contratosEmpresa.create', $empresa);
         }
 
-        $informacion = $contrato->informacion_adicional_empresa;
+        $informacion = $contrato->informacionAdicionalEmpresa;
 
         return view('contratosEmpresa.edit', compact('empresa', 'contrato', 'informacion'));
     }
@@ -117,7 +117,7 @@ class ContratoEmpresaController extends Controller
     {
         $contrato = $empresa->contratosEmpresa()
             ->where('estado', 1)
-            ->with('informacion_adicional_empresa')
+            ->with('informacionAdicionalEmpresa')
             ->first();
 
         if (!$contrato) {
@@ -130,7 +130,7 @@ class ContratoEmpresaController extends Controller
             'finalizacion_contrato' => 'nullable|date|after_or_equal:inicio_contrato',
         ]);
 
-        $contrato->informacion_adicional_empresa->update($validated);
+        $contrato->informacionAdicionalEmpresa->update($validated);
 
         return redirect()
             ->route('empresas.detalle', $empresa);
@@ -138,13 +138,13 @@ class ContratoEmpresaController extends Controller
 
     public function verInfo(ContratoEmpresa $contratoEmpresa)
     {
-        $contratoEmpresa->load(['informacion_adicional_empresa', 'empresa']);
+        $contratoEmpresa->load(['informacionAdicionalEmpresa', 'empresa']);
         return view('contratosEmpresa.ver-info', compact('contratoEmpresa'));
     }
 
     public function documentos(ContratoEmpresa $contratoEmpresa)
     {
-        $contratoEmpresa->load(['empresa', 'informacion_adicional_empresa']);
+        $contratoEmpresa->load(['empresa', 'informacionAdicionalEmpresa']);
     
         $documentos = $contratoEmpresa->documentos()
             ->with(['categoria', 'area', 'usuario'])

@@ -17,14 +17,14 @@
                 </p>
                 <p class="mb-1">
                     <strong>Inicio de contrato:</strong>
-                    {{ $contrato->informacion_adicional_empresa->inicio_contrato
-                        ? \Carbon\Carbon::parse($contrato->informacion_adicional_empresa->inicio_contrato)->format('d/m/Y')
+                    {{ $contrato->informacionAdicionalEmpresa->inicio_contrato
+                        ? \Carbon\Carbon::parse($contrato->informacionAdicionalEmpresa->inicio_contrato)->format('d/m/Y')
                         : '—' }}
                 </p>
                 <p class="mb-3">
                     <strong>Finalización de contrato:</strong>
-                    {{ $contrato->informacion_adicional_empresa->finalizacion_contrato
-                        ? \Carbon\Carbon::parse($contrato->informacion_adicional_empresa->finalizacion_contrato)->format('d/m/Y')
+                    {{ $contrato->informacionAdicionalEmpresa->finalizacion_contrato
+                        ? \Carbon\Carbon::parse($contrato->informacionAdicionalEmpresa->finalizacion_contrato)->format('d/m/Y')
                         : '—' }}
                 </p>
 

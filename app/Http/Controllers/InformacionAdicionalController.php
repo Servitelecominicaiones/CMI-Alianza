@@ -73,7 +73,9 @@ class InformacionAdicionalController extends Controller
             ->first();
 
         $informacion = $contrato->informacionAdicional;
-        $empresas = Empresa::where('estado', 1) -> get();
+        $empresas = Empresa::where('estado', 1)
+            ->orWhere('id_empresa', $contrato->id_empresa)
+            ->get();
 
         // Si no tiene info adicional, redirige al create
         if (!$informacion) {

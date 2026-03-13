@@ -111,13 +111,13 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{{ $contratoActivo->informacion_adicional_empresa->inicio_contrato
-                                        ? \Carbon\Carbon::parse($contratoActivo->informacion_adicional_empresa->inicio_contrato)->format('d/m/Y')
+                                <td>{{ $contratoActivo->informacionAdicionalEmpresa->inicio_contrato
+                                        ? \Carbon\Carbon::parse($contratoActivo->informacionAdicionalEmpresa->inicio_contrato)->format('d/m/Y')
                                         : '—' }}</td>
-                                <td>{{ $contratoActivo->informacion_adicional_empresa->finalizacion_contrato
-                                        ? \Carbon\Carbon::parse($contratoActivo->informacion_adicional_empresa->finalizacion_contrato)->format('d/m/Y')
+                                <td>{{ $contratoActivo->informacionAdicionalEmpresa->finalizacion_contrato
+                                        ? \Carbon\Carbon::parse($contratoActivo->informacionAdicionalEmpresa->finalizacion_contrato)->format('d/m/Y')
                                         : '—' }}</td>
-                                
+                                    
                                 {{-- Ver documentos --}}
                                 <td class="text-center">
                                     <a href="{{ route('contratosEmpresa.documentos', $contratoActivo) }}"
@@ -199,11 +199,11 @@
                         <tbody>
                             @foreach($contratosInactivos as $inactivo)
                                 <tr>
-                                    <td>{{ $inactivo->informacion_adicional_empresa->inicio_contrato
-                                            ? \Carbon\Carbon::parse($inactivo->informacion_adicional_empresa->inicio_contrato)->format('d/m/Y')
+                                    <td>{{ $inactivo->informacionAdicionalEmpresa->inicio_contrato
+                                            ? \Carbon\Carbon::parse($inactivo->informacionAdicionalEmpresa->inicio_contrato)->format('d/m/Y')
                                             : '—' }}</td>
-                                    <td>{{ $inactivo->informacion_adicional_empresa->finalizacion_contrato
-                                            ? \Carbon\Carbon::parse($inactivo->informacion_adicional_empresa->finalizacion_contrato)->format('d/m/Y')
+                                    <td>{{ $inactivo->informacionAdicionalEmpresa->finalizacion_contrato
+                                            ? \Carbon\Carbon::parse($inactivo->informacionAdicionalEmpresa->finalizacion_contrato)->format('d/m/Y')
                                             : '—' }}</td>
 
                                     <td class = 'text-center'>
