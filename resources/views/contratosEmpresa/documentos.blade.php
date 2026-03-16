@@ -6,9 +6,13 @@
 <div class="container">
 
     {{-- Encabezado --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
-            <h3 class="mb-0">Documentos del Contrato</h3>
+            <h3 class="mb-0">Documentos del Contrato Empresa:</h3>
+            <p class="text-muted mb-0">
+                <strong>Fecha Inicio:</strong> {{ $contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato }}
+                <strong>Fecha Final:</strong> {{ $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato }}
+            </p>
             <small class="text-muted">
                 {{ $contratoEmpresa->empresa->nombre_empresa }}
                 —
@@ -25,7 +29,7 @@
     {{-- Tabla documentos --}}
     <div class="card">
         <div class="card-header bg-dark text-white">
-            <i class="bi bi-file-earmark-text me-2"></i> Documentos
+            <i class="bi bi-file-earmark-text me-2"></i> Total de documentos: {{ $documentos->count() }}
         </div>
         <div class="card-body">
             @if($documentos->isNotEmpty())
@@ -33,11 +37,13 @@
                     <table class="table table-striped table-hover align-middle">
                         <thead class="table-dark">
                             <tr>
-                                <th>Nombre</th>
+                                <th>Nombre del archivo</th>
                                 <th>Categoría</th>
                                 <th>Área</th>
                                 <th>Año</th>
-                                <th>Descripción</th>
+                                <th>Tamaño</th>
+                                <th>Cargado Por</th>
+                                <th>Fecha de Carga</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -48,7 +54,9 @@
                                     <td>{{ $documento->categoria->nombre ?? '—' }}</td>
                                     <td>{{ $documento->area->nombre ?? '—' }}</td>
                                     <td>{{ $documento->anio }}</td>
-                                    <td>{{ $documento->descripcion ?? '—' }}</td>
+                                    <td>{{ number_format($documento->tamanio /1024,2)}} KB</td>
+                                    <td>{{ $documento->usuario->nombre ?? 'Desconocido' }} </td>
+                                    <td> {{ $documento->created_at->format('d/m/Y H:i') }} </td>
                                     <td class="text-center">
                                         <div class="d-flex gap-2 justify-content-center">
 

@@ -341,11 +341,11 @@ class DocumentoController extends Controller
             'area_id' => 'required',
             'categoria_id' => 'required',
             'descripcion' => 'nullable|string',
-            'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato',
+            'tipo_propietario' => 'nullable|in:empresa,colaborador,contrato,contratoEmpresa',
             'empresa_id' => 'required_if:tipo_propietario,empresa|nullable|exists:empresa,id_empresa',
             'colaborador_id' => 'required_if:tipo_propietario,colaborador|nullable|exists:colaborador,id_colaborador',
             'contrato_id' => 'required_if:tipo_propietario,contrato|nullable|exists:contratos,id_contrato',
-            'contrato_empresa_id' => 'required_if:tipo_propietario,contratoEmpresa|nullable|exist:contrato_empresa,id_contrato_empresa'
+            'contrato_empresa_id' => 'required_if:tipo_propietario,contratoEmpresa|nullable|exists:contrato_empresa,id_contrato_empresa'
         ]);
 
         DB::beginTransaction();
