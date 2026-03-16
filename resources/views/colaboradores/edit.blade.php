@@ -157,15 +157,6 @@
             </select>
         </div>
 
-        {{-- Estado --}}
-        <div class="mb-3">
-            <label class="form-label">Estado</label>
-            <select name="estado" class="form-select" required>
-                <option value="1" {{ old('estado', $colaborador->estado) == 1 ? 'selected' : '' }}>Activo</option>
-                <option value="0" {{ old('estado', $colaborador->estado) == 0 ? 'selected' : '' }}>Inactivo</option>
-            </select>
-        </div>
-
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Actualizar Colaborador
@@ -210,13 +201,26 @@
 
 <script>
 document.getElementById('formEditarColaborador').addEventListener('submit', function (e) {
+    e.preventDefault();
+    
+    Swal.fire({
+        title: '¿Confirmar actualización?',
+        text: '¿Seguro que deseas actualizar la información del Colaborador?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d'
+    }).then((result) => {
+        if (result.isConfirmed) {
 
-    if (!confirm('¿Está seguro de Modificar la Informacion de este Colaborador?')) {
-        e.preventDefault();
-        return;
-    }
+            // Mostrar loader
+            document.getElementById('loader-overlay').style.display = 'flex';
 
-    document.getElementById('loader-overlay').style.display = 'flex';
+            this.submit();
+        }
+    });
 });
 </script>
 

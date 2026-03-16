@@ -97,20 +97,6 @@
             @enderror
         </div>
 
-        {{-- Estado --}}
-        <div class="mb-3">
-            <label class="form-label">Estado</label>
-            <select name="estado"
-                    class="form-select @error('estado') is-invalid @enderror"
-                    required>
-                <option value="1" {{ old('estado', $empresa->estado) == 1 ? 'selected' : '' }}>Activa</option>
-                <option value="0" {{ old('estado', $empresa->estado) == 0 ? 'selected' : '' }}>Inactiva</option>
-            </select>
-            @error('estado')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Actualizar Empresa
@@ -155,13 +141,26 @@
 
 <script>
 document.getElementById('formEditarEmpresa').addEventListener('submit', function (e) {
+    e.preventDefault();
 
-    if (!confirm('¿Está seguro de actualizar esta empresa?')) {
-        e.preventDefault();
-        return;
-    }
+    Swal.fire({
+        title: '¿Confirmar actualización?',
+        text: '¿Seguro que deseas actualizar la información del La Empresa?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d'
+    }).then((result) => {
+        if (result.isConfirmed) {
 
-    document.getElementById('loader-overlay').style.display = 'flex';
+            // Mostrar loader
+            document.getElementById('loader-overlay').style.display = 'flex';
+
+            this.submit();
+        }
+    });
 });
 </script>
 

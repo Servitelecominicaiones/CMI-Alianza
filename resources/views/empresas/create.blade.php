@@ -97,20 +97,6 @@
             @enderror
         </div>
 
-        {{-- Estado --}}
-        <div class="mb-3">
-            <label class="form-label">Estado</label>
-            <select name="estado"
-                    class="form-select @error('estado') is-invalid @enderror"
-                    required>
-                <option value="1" {{ old('estado') == 1 ? 'selected' : '' }}>Activa</option>
-                <option value="0" {{ old('estado') == 0 ? 'selected' : '' }}>Inactiva</option>
-            </select>
-            @error('estado')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Guardar

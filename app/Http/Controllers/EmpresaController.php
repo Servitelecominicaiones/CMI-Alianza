@@ -35,9 +35,7 @@ class EmpresaController extends Controller
 
             'barrio' => 'nullable|string|max:150',
 
-            'telefono' => 'nullable|numeric',
-
-            'estado' => 'required|boolean'
+            'telefono' => 'nullable|numeric'
         ]);
 
         Empresa::create([
@@ -48,7 +46,7 @@ class EmpresaController extends Controller
             'direccion' => $request -> direccion,
             'barrio' => $request -> barrio,
             'telefono' => $request -> telefono,
-            'estado' => $request -> estado
+            'estado' => 0
         ]);
 
         return redirect()
@@ -76,9 +74,7 @@ class EmpresaController extends Controller
 
             'barrio' => 'nullable|string|max:150',
 
-            'telefono' => 'nullable|numeric',
-
-            'estado' => 'required|boolean'
+            'telefono' => 'nullable|numeric'
         ]);
 
         $empresa->update($request->only([
@@ -88,8 +84,7 @@ class EmpresaController extends Controller
             'ciudad',
             'direccion',
             'barrio',
-            'telefono',
-            'estado'
+            'telefono'
         ]));
 
         return redirect()

@@ -157,15 +157,6 @@
             </select>
         </div>
 
-        {{-- Estado --}}
-        <div class="mb-3">
-            <label class="form-label">Estado</label>
-            <select name="estado" class="form-select" required>
-                <option value="1" {{ old('estado') == 1 ? 'selected' : '' }}>Activo</option>
-                <option value="0" {{ old('estado') == 0 ? 'selected' : '' }}>Inactivo</option>
-            </select>
-        </div>
-
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Guardar

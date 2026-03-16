@@ -77,11 +77,26 @@
 
 <script>
 document.getElementById('formInfoAdicional').addEventListener('submit', function (e) {
-    if (!confirm('¿Está seguro de actualizar la información adicional?')) {
-        e.preventDefault();
-        return;
-    }
-    document.getElementById('loader-overlay').style.display = 'flex';
+    e.preventDefault();
+
+    Swal.fire({
+        title: '¿Confirmar actualización?',
+        text: '¿Seguro que deseas actualizar la información del Contrato?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d'
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            // Mostrar loader
+            document.getElementById('loader-overlay').style.display = 'flex';
+
+            this.submit();
+        }
+    });
 });
 </script>
 

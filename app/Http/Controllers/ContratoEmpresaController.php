@@ -84,11 +84,18 @@ class ContratoEmpresaController extends Controller
             'motivo' => 'required|string|max:500',
         ]);
 
+        //actualizar contrato
         $contratoEmpresa->update([
             'estado'              => 0,
             'motivo_inactivacion' => $request->motivo,
         ]);
 
+        //actualizar fecha de finalizacion
+        $contratoEmpresa->informacionAdicionalEmpresa->update([
+            'finalizacion_contrato' => now()
+        ]);
+
+        //actualizar el estado de la empresa
         $empresa->update(['estado' => 0]);
 
         return redirect()

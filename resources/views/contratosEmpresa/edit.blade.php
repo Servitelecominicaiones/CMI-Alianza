@@ -18,7 +18,7 @@
         </a>
     </div>
 
-    <form action="{{ route('contratosEmpresa.update', $empresa) }}" method="POST">
+    <form id="formEditContratoEmpresa" action="{{ route('contratosEmpresa.update', $empresa) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -74,3 +74,32 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('formEditContratoEmpresa').addEventListener('submit', function(e) { 
+
+        e.preventDefault();
+
+        Swal.fire({
+            title: '¿Confirmar actualización?',
+            text: '¿Seguro que deseas actualizar la información del Contrato de Empresa?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, actualizar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#0d6efd',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                // Mostrar loader
+                document.getElementById('loader-overlay').style.display = 'flex';
+
+                this.submit();
+            }
+        });
+
+    });
+</script>
+@endpush

@@ -50,9 +50,9 @@ class ColaboradorController extends Controller
             'telefono_residencial' => 'nullable|string|max:20',
             'telefono_celular' => 'nullable|string|max:20',
     
-            'estudios' => 'nullable|string|max:255',
+            'estudios' => 'nullable|string|max:255'
     
-            'estado' => 'required|boolean'
+            
         ]);
 
         Colaborador::create([
@@ -71,7 +71,7 @@ class ColaboradorController extends Controller
             'telefono_residencial' => $request->telefono_residencial,
             'telefono_celular' => $request->telefono_celular,
             'estudios' => $request->estudios,
-            'estado' => $request->estado,
+            'estado' => 0
         ]);
 
         return redirect()
@@ -111,9 +111,7 @@ class ColaboradorController extends Controller
             'estado_civil' => 'nullable|string|max:50',
             'telefono_residencial' => 'nullable|string|max:20',
             'telefono_celular' => 'nullable|string|max:20',
-            'estudios' => 'nullable|string|max:255',
-
-            'estado' => 'required|boolean'
+            'estudios' => 'nullable|string|max:255'
         ]);
 
         $colaborador->update($request->only([
@@ -131,8 +129,7 @@ class ColaboradorController extends Controller
             'estado_civil',
             'telefono_residencial',
             'telefono_celular',
-            'estudios',
-            'estado'
+            'estudios'
         ]));
 
     return redirect()
