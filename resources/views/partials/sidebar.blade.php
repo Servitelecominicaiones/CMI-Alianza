@@ -38,7 +38,7 @@
         @if(in_array('colaboradores.ver', session('permisos_usuario', [])))
         <li class="nav-item">
             <a href="{{ route('colaboradores.index') }}"
-            class="nav-link {{ request()->routeIs('colaboradores.*') ? 'active' : '' }}">
+            class="nav-link {{ request()->routeIs('colaboradores.*', 'informacion_adicional.*','contrato.*','contratos.*') ? 'active' : '' }}">
                 <i class="bi bi-person-badge""></i>
                 <span>Colaboradores</span>
             </a>
@@ -49,7 +49,7 @@
         @if(in_array('empresas.ver', session('permisos_usuario', [])))
         <li class="nav-item">
             <a href="{{ route('empresas.index') }}"
-            class="nav-link {{ request()->routeIs('empresas.*') ? 'active' : '' }}">
+            class="nav-link {{ request()->routeIs('empresas.*','contratosEmpresa.*') ? 'active' : '' }}">
                 <i class="bi bi-buildings"></i>
                 <span>Empresas</span>
             </a>

@@ -1,43 +1,39 @@
 @extends('layouts.app')
 
-@section('title', 'Documentos del Colaborador')
+@section('title', 'Documentos de la Empresa')
 
 @section('content')
+<div class="container">
 
-<div class="container-fluid">
-    {{-- Header --}}
-    <div class="row mb-4">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2>Documentos de {{ $empresa->nombre_empresa }}</h2>
-                    <p class="text-muted mb-0">
-                        <strong>Nit De La empresa:</strong> {{ $empresa->nit }} | 
-                        <strong>Actividad:</strong> {{ $empresa->actividad }}
-                    </p>
-                </div>
-                <a href="{{ route('empresas.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver a Empresas
-                </a>
-            </div>
+    {{-- Encabezado --}}
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h3 class="mb-0">Documentos de la Empresa</h3>
+            <p class="text-muted mb-0">
+                <strong>{{ $empresa->nombre_empresa }}</strong>
+            </p>
+            <small class="text-muted">
+                NIT: {{ $empresa->nit }} — Actividad: {{ $empresa->actividad }}
+            </small>
         </div>
+
+        <a href="{{ route('empresas.index') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
     </div>
 
-    {{-- Contenido --}}
-    @if($documentos->isEmpty())
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i>
-            Esta Empresa no tiene documentos asociados.
+    {{-- Card --}}
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            Total de documentos: {{ $documentos->count() }}
         </div>
-    @else
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Total de documentos: {{ $documentos->count() }}</h5>
-            </div>
-            <div class="card-body p-0">
+
+        <div class="card-body">
+            @if($documentos->isNotEmpty())
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
                             <tr>
                                 <th>Nombre del Archivo</th>
                                 <th>Categoría</th>
@@ -46,7 +42,7 @@
                                 <th>Tamaño</th>
                                 <th>Cargado por</th>
                                 <th>Fecha de Carga</th>
-                                <th>Acciones</th>
+                                <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -56,32 +52,37 @@
                                         <i class="bi bi-file-earmark-{{ $documento->extension }}"></i>
                                         {{ $documento->nombre_original }}
                                     </td>
-                                    <td>
-                                        <span class="badge bg-primary">
-                                            {{ $documento->categoria->nombre ?? 'N/A' }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $documento->area->nombre ?? 'N/A' }}</td>
+                                    <td>{{ $documento->categoria->nombre ?? '—' }}</td>
+                                    <td>{{ $documento->area->nombre ?? '—' }}</td>
                                     <td>{{ $documento->anio }}</td>
                                     <td>{{ number_format($documento->tamanio / 1024, 2) }} KB</td>
                                     <td>{{ $documento->usuario->nombre ?? 'Desconocido' }}</td>
                                     <td>{{ $documento->created_at->format('d/m/Y H:i') }}</td>
-                                    <td>
-                                        <a href="{{ $documento->previewUrl() }}" 
-                                           class="btn btn-sm btn-primary" 
-                                           target="_blank"
-                                           title="Ver documento">
-                                            <i class="bi bi-eye"></i> Ver
-                                        </a>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-2 justify-content-center">
+
+                                            {{-- Ver --}}
+                                            <a href="{{ route('documentos.preview', $documento) }}"
+                                               target="_blank"
+                                               class="btn btn-sm btn-primary"
+                                               title="Ver documento">
+                                                <i class="bi bi-eye"></i> Ver
+                                            </a>
+
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-            </div>
+            @else
+                <p class="text-muted mb-0">
+                    No hay documentos registrados para esta empresa.
+                </p>
+            @endif
         </div>
-    @endif
-</div>
+    </div>
 
+</div>
 @endsection
