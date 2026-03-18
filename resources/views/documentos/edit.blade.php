@@ -71,7 +71,7 @@
         {{-- ========== SELECTOR DE EMPRESA ========== --}}
         <div class="mb-3" id="selector_empresa" style="display: {{ $documento->owner_type === 'empresa' ? 'block' : 'none' }};">
             <label class="form-label">Empresa <span class="text-danger">*</span></label>
-            <select name="empresa_id" id="empresa_id" class="form-select">
+            <select name="empresa_id" id="empresa_id" class="form-select select2">
                 <option value="">-- Seleccione una empresa --</option>
                 @foreach($empresas as $empresa)
                     <option value="{{ $empresa->id_empresa }}"
@@ -85,7 +85,7 @@
         {{-- ========== SELECTOR DE COLABORADOR ========== --}}
         <div class="mb-3" id="selector_colaborador" style="display: {{ $documento->owner_type === 'colaborador' ? 'block' : 'none' }};">
             <label class="form-label">Colaborador <span class="text-danger">*</span></label>
-            <select name="colaborador_id" id="colaborador_id" class="form-select">
+            <select name="colaborador_id" id="colaborador_id" class="form-select select2">
                 <option value="">-- Seleccione un colaborador --</option>
                 @foreach($colaboradores as $colaborador)
                     <option value="{{ $colaborador->id_colaborador }}"
@@ -100,7 +100,7 @@
 
         {{-- selector de contrato Colaborador --}}
         <div class="mb-3" id="selector_contrato" style="display: {{ $documento->owner_type === 'contrato' ? 'block' : 'none' }};">
-            <select name="contrato_id" id="contrato_id" class="form-select">
+            <select name="contrato_id" id="contrato_id" class="form-select select2">
                 <option value="">-- Seleccione un contrato --</option>
                 @foreach($contratos as $contrato)
                     <option value="{{ $contrato->id_contrato }}"
@@ -118,7 +118,7 @@
         {{-- ========== SELECTOR CONTRATO EMPRESA ========== --}}
         <div class="mb-3" id="selector_contrato_empresa" style="display: {{ $documento->owner_type === 'contratoEmpresa' ? 'block' : 'none' }};">
             <label class="form-label">Contrato Empresa <span class="text-danger">*</span></label>
-            <select name="contrato_empresa_id" id="contrato_empresa_id" class="form-select">
+            <select name="contrato_empresa_id" id="contrato_empresa_id" class="form-select select2">
                 <option value="">-- Seleccione un contrato --</option>
                 @foreach($contratosEmpresa as $contratoEmpresa)
                     <option value="{{ $contratoEmpresa->id_contrato_empresa }}"
@@ -200,6 +200,16 @@ document.getElementById('tipo_propietario').addEventListener('change', function(
         selectorContratoEmpresa.style.display = 'block';
         selectContratoEmpresa.setAttribute('required','required');
     }
+});
+
+/*====  Select2 ==== */
+$(document).ready(function() {
+    $('.select2').select2({
+        placeholder: "Escribe para Buscar...",
+        allowClear: true,
+        width: '100%',
+        theme: 'bootstrap-5'
+    });
 });
 </script>
 @endpush
