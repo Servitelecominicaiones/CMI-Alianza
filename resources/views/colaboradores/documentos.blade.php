@@ -152,7 +152,7 @@
             e.preventDefault()
 
             Swal.fire({
-                title: '¿Estas seguro de Inactivar este Documento?',
+                title: '¿Estas seguro(a) de Inactivar este Documento?',
                 text: 'Se inactivara el Documento y no aparecera en el dashboard',
                 icon: 'warning',
                 showCancelButton: true,

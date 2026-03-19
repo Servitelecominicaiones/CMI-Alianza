@@ -4,7 +4,7 @@
 <div class="container">
     <h2>Editar documento</h2>
 
-    <form action="{{ route('documentos.update', $documento) }}"
+    <form id="formEditar" action="{{ route('documentos.update', $documento) }}"
           method="POST"
           enctype="multipart/form-data">
 
@@ -209,6 +209,28 @@ $(document).ready(function() {
         allowClear: true,
         width: '100%',
         theme: 'bootstrap-5'
+    });
+});
+
+document.getElementById('formEditar').addEventListener('submit', function(e){
+    e.preventDefault();
+    
+    Swal.fire({
+        title: '¿Estas seguro(a) de Editar este Documento?',
+        text: 'La informacion ligada a este documento cambiara',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, Editar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d'
+    }).then((result)=>{
+        if(result.isConfirmed){
+            // Mostrar loader
+            document.getElementById('loader-overlay').style.display = 'flex';
+
+            this.submit();
+        }
     });
 });
 </script>

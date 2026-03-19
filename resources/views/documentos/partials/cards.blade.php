@@ -77,7 +77,7 @@
 
             {{-- INACTIVAR --}}
             @if(in_array('documentos.eliminar', session('permisos_usuario', [])))
-                <form method="POST"
+                <form method="POST" id="formInactivar"
                 action="{{ route('documentos.destroy',$doc->id)}}"
                 class="d-inline"
                 onsubmit="return confirmarInactivacion()">
@@ -98,8 +98,30 @@
     {{ $documentos->links() }}
 </div>
 
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-function confirmarInactivacion() {
-    return confirm("¿Estás seguro de que deseas inactivar este documento?");
-}
+    document.getElementById('formInactivar').addEventListener('submit', function(e){
+            e.preventDefault()
+
+            Swal.fire({
+                title: '¿Estas seguro(a) de Inactivar este Documento?',
+                text: 'Se inactivara el Documento y no aparecera en el dashboard',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Inactivar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    // Mostrar loader
+                    document.getElementById('loader-overlay').style.display = 'flex';
+
+                    this.submit();
+                }
+            });
+        });
 </script>
