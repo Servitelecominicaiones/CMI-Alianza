@@ -109,7 +109,7 @@
 
                                             @if (in_array('documentos.eliminar', session('permisos_usuario', []))&& $contrato->estado == 1)
                                                 {{-- Inactivar --}}
-                                                <form method="POST"
+                                                <form method="POST" id = "formInactivar"
                                                     action="{{ route('documentos.destroy',$documento)}}"
                                                     class="d-inline"
                                                     onsubmit="return confirmarInactivacion()">
@@ -152,6 +152,29 @@
     <script>
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
             new bootstrap.Tooltip(el);
+        });
+
+        document.getElementById('formInactivar').addEventListener('submit', function(e){
+            e.preventDefault()
+
+            Swal.fire({
+                title: '¿Estas seguro de Inactivar este Documento?',
+                text: 'Se inactivara el Documento y no aparecera en el dashboard',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Inactivar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    // Mostrar loader
+                    document.getElementById('loader-overlay').style.display = 'flex';
+
+                    this.submit();
+                }
+            });
         });
     </script>
 @endpush
