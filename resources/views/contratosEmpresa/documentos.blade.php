@@ -69,25 +69,29 @@
                                                 <i class="bi bi-eye"></i> 
                                             </a>
                                             
-                                            {{-- Editar Documento --}}
-                                            <a href="{{ route('documentos.edit', $documento) }}"
-                                            data-bs-toggle="tooltip"
-                                            title="Editar Documento"
-                                            class="btn btn-sm btn-warning">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            
-                                            {{-- Inactivar --}}
-                                            <form method="POST"
-                                                action="{{ route('documentos.destroy',$documento)}}"
-                                                class="d-inline"
-                                                onsubmit="return confirmarInactivacion()">
-                                                @csrf
-                                                @method("PUT")
-                                                    <button type="submit" class="btn btn-sm btn-danger" 
-                                                    data-bs-toggle="tooltip" title="Inactivar Documento">
-                                                    <i class="bi bi-trash"></i>
-                                            </form>
+                                            @if (in_array('documentos.editar',session('permisos_usuario',[])) && $contratoEmpresa->estado == 1)
+                                                {{-- Editar Documento --}}
+                                                <a href="{{ route('documentos.edit', $documento) }}"
+                                                data-bs-toggle="tooltip"
+                                                title="Editar Documento"
+                                                class="btn btn-sm btn-warning">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            @endif
+
+                                            @if (in_array('documentos.editar',session('permisos_usuario',[])) && $contratoEmpresa->estado == 1)
+                                                {{-- Inactivar --}}
+                                                <form method="POST"
+                                                    action="{{ route('documentos.destroy',$documento)}}"
+                                                    class="d-inline"
+                                                    onsubmit="return confirmarInactivacion()">
+                                                    @csrf
+                                                    @method("PUT")
+                                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                        data-bs-toggle="tooltip" title="Inactivar Documento">
+                                                        <i class="bi bi-trash"></i>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
 
