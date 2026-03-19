@@ -79,18 +79,38 @@
 
                                     <td>{{ $documento->created_at->format('d/m/Y H:i') }}</td>
 
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center">
+                                    <td>
+                                        <div class="d-flex justify-content-space-around"->
 
                                             <a href="{{ route('documentos.preview', $documento) }}"
                                                target="_blank"
                                                class="btn btn-sm btn-primary"
-                                               title="Ver documento">
+                                               title="Ver documento"
+                                               data-bs-toggle="tooltip">
 
-                                                <i class="bi bi-eye"></i> Ver
+                                                <i class="bi bi-eye"></i> 
 
                                             </a>
-
+                                            
+                                            {{-- Editar Documento --}}
+                                            <a href="{{ route('documentos.edit', $documento) }}"
+                                            data-bs-toggle="tooltip"
+                                            title="Editar Documento"
+                                            class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            
+                                            {{-- Inactivar --}}
+                                            <form method="POST"
+                                                action="{{ route('documentos.destroy',$documento)}}"
+                                                class="d-inline"
+                                                onsubmit="return confirmarInactivacion()">
+                                                @csrf
+                                                @method("PUT")
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                    data-bs-toggle="tooltip" title="Inactivar Documento">
+                                                    <i class="bi bi-trash"></i>
+                                            </form>
                                         </div>
                                     </td>
 
@@ -117,3 +137,11 @@
 </div>
 
 @endsection
+
+@push('scripts')
+    <script>
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            new bootstrap.Tooltip(el);
+        });
+    </script>
+@endpush
