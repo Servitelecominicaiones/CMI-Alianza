@@ -72,7 +72,7 @@
 
                                             @if (in_array('documentos.editar', session('permisos_usuario', [])))
                                                 {{-- Editar Documento --}}
-                                                <a href="{{ route('documentos.edit', $documento) }}"
+                                                <a href="{{ route('documentos.edit', [$documento, 'from' => url()->current() ]) }}"
                                                 data-bs-toggle="tooltip"
                                                 title="Editar Documento"
                                                 class="btn btn-sm btn-warning">

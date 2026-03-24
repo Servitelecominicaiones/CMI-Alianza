@@ -322,10 +322,11 @@ class DocumentoController extends Controller
     }
 
     /* ================= Editar ================= */
-    public function edit(Documento $documento)
+    public function edit(Request $request,Documento $documento)
     {
         return view('documentos.edit', [
             'documento' => $documento,
+            'from' => $request->query('from'),
             'areas' => Area::where('estado', 1)->get(),
             'categorias' => Categoria::where('estado', 1)->get(),
             'empresas' => Empresa::where('estado',1)->get(),
@@ -444,6 +445,10 @@ class DocumentoController extends Controller
 
             DB::commit();
 
+            if($request -> filled('from')){
+                return redirect($request->from)
+                    ->with('success','Documento actualizado correctamente');
+            }
             return redirect()
                 ->route('documentos.index')
                 ->with('success', 'Documento actualizado correctamente');

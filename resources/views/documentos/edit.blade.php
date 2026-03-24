@@ -10,7 +10,10 @@
 
         @csrf
         @method('PUT')
-
+        
+        {{-- Input oculto redireccion --}}
+        <input type="hidden" name="from" value="{{ $from }}">
+        
         <div class="mb-3">
             <label class="form-label">Nombre original</label>
             <input type="text"
