@@ -7,12 +7,22 @@ use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\CryptoHelper;
+use function PHPUnit\Framework\returnArgument;
 
 class UsuarioController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $usuarios = User::with('rol')->get();
+
+        /** RESPUESTA API**/
+        if($request->expectsJson()){
+            return response()->json([
+                'success' => true,
+                'data' => $usuarios
+            ]);
+        }
+        /** RESPUESTA WEB**/
         return view('usuarios.index', compact('usuarios'));
     }
 
@@ -49,7 +59,7 @@ class UsuarioController extends Controller
             'password.regex'    => 'La contraseña debe contener al menos una mayúscula, dos números y un carácter especial.',
         ]);
 
-        User::create([
+        $usuario = User::create([
             'nombre'   => $request->nombre,
             'email'    => $request->email,
             'password' => CryptoHelper::Enc('enc',$request->password),
@@ -57,6 +67,17 @@ class UsuarioController extends Controller
             'estado'   => $request->estado,
         ]);
 
+        /** RESPUESTA API **/
+
+        if ($request -> expectsJson()){
+            return response()->json([
+                'success' => true,
+                'message' => 'usuario creado exitosamente',
+                'data' => $usuario
+            ],201);
+        }
+
+        /* RESPUESTA WEB */
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario creado correctamente');
