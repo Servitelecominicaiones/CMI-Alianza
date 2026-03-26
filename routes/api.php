@@ -3,6 +3,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ColaboradorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,4 +37,15 @@ Route::get('/categorias',[CategoriaController::class,'index']);
 Route::post('/categorias',[CategoriaController::class, 'store']);
 Route::put('/categorias/{categoria}',[CategoriaController::class, 'update']);
 Route::delete('/categorias/{categoria}',[CategoriaController::class, 'destroy']);
+
+/*
+|--------------------------------------------------------------------------
+| Rutas Modulo Colaboradores
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/colaboradores',[ColaboradorController::class, 'index']);
+Route::post('/colaboradores',[ColaboradorController::class, 'store']);
+Route::put('/colaboradores/{colaborador}',[ColaboradorController::class, 'update']);
+Route::delete('/colaboradores/{colaborador}',[ColaboradorController::class, 'inactivar']);
 

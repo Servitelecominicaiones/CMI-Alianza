@@ -9,10 +9,19 @@ use App\Models\Identificacion;
 
 class ColaboradorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $colaboradores = Colaborador::with('identificacion')->get();
+        
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'data'=> $colaboradores
+            ]);
+        }
 
+        /** RESPUESTA WEB */
         return view('colaboradores.index',compact('colaboradores'));
     }
 
@@ -55,7 +64,7 @@ class ColaboradorController extends Controller
             
         ]);
 
-        Colaborador::create([
+        $colaborador = Colaborador::create([
             'id_tipo_identificacion' => $request->id_tipo_identificacion,
             'numero_identificacion' => $request->numero_identificacion,
             'primer_nombre' => $request->primer_nombre,
@@ -74,6 +83,16 @@ class ColaboradorController extends Controller
             'estado' => 0
         ]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Colaborador Creado Exitosamente',
+                'data'=> $colaborador
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return redirect()
             ->route('colaboradores.index')
             ->with('success', 'Colaborador creado Exitosamente');
@@ -132,13 +151,35 @@ class ColaboradorController extends Controller
             'estudios'
         ]));
 
-    return redirect()
-        ->route('colaboradores.index')
-        ->with('success', 'Colaborador actualizado correctamente');
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Colaborador editado exitosamente',
+                'data'=> $colaborador
+            ]);
+        }
+
+        /** RESPUESTA WEB */
+        return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'Colaborador actualizado correctamente');
     }
 
-    public function inactivar(Colaborador $colaborador)
+    public function inactivar(Colaborador $colaborador , Request $request)
     {
+
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'data'=> [
+                    "colaborador"=>$colaborador->numero_identificacion,
+                    "Nuevo Estado"=>$colaborador->estado
+                ]
+            ]);
+        }
+
         if ($colaborador->estado == 0) {
         return redirect()
             ->route('colaboradores.index')
@@ -149,6 +190,7 @@ class ColaboradorController extends Controller
             'estado' => 0
         ]);
 
+        /** RESPUESTA WEB */
         return redirect()
             ->route('colaboradores.index')
             ->with('success', 'Colaborador inactivado correctamente.');
