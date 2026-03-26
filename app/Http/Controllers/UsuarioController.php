@@ -34,7 +34,7 @@ class UsuarioController extends Controller
 
     public function store(Request $request)
     {
-       $request->validate([
+        $request->validate([
             'nombre'   => 'required|string|max:255',
             'email'    => 'required|email|unique:usuarios,email',
             'rol_id'   => 'required|exists:roles,id',
@@ -125,17 +125,40 @@ class UsuarioController extends Controller
         }
 
         $usuario->update($data);
+        
+        /** Respuesta api **/
+        if ($request->expectsJson()){
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario actualizado correctamente',
+                'data'    => $usuario->fresh()
+            ],201);
+        }
 
+        /** Respuesta Web **/
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario actualizado correctamente');
     }
 
 
-    public function destroy(User $usuario)
+    public function destroy(User $usuario, Request $request)
     {
         $usuario->update(['estado' => 0]);
 
+        /** Respuesta Api **/
+        if ($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Usuario inactivado exitosamente',
+                'data' => [
+                        $usuario -> nombre,
+                        $usuario -> estado
+                ]
+            ]);
+        }
+
+        /** Respuesta Web **/
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario inactivado');
