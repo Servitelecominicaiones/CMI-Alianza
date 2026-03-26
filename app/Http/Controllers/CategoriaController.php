@@ -7,12 +7,21 @@ use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $categorias = Categoria::where('estado', 1)
             ->orderBy('nombre')
             ->get();
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'data'=> $categorias
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return view('categorias.index', compact('categorias'));
     }
 
@@ -27,10 +36,21 @@ class CategoriaController extends Controller
             'nombre' => 'required|unique:categorias,nombre'
         ]);
 
-        Categoria::create([
+        $categoria = Categoria::create([
             'nombre' => $request->nombre,
             'estado' => 1
         ]);
+
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=> 'Categoria Creada Exitosamente',
+                'data'=> $categoria
+            ]);
+        }
+
+        /** RESPUESTA WEB */
 
         return redirect()
             ->route('categorias.index')
@@ -52,17 +72,41 @@ class CategoriaController extends Controller
             'nombre' => $request->nombre
         ]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Categoria editada exitosamente',
+                'data'=> $categoria
+            ]);
+        }
+
+        /** RESPUESTA WEB */
+
         return redirect()
             ->route('categorias.index')
             ->with('success', 'Categoría actualizada correctamente');
     }
 
-    public function destroy(Categoria $categoria)
+    public function destroy(Categoria $categoria , Request $request)
     {
         $categoria->update([
             'estado' => 0
         ]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Categoria incativada exitosamente',
+                'data'=> [
+                    $categoria->nombre,
+                    $categoria->estado
+                ]
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return redirect()
             ->route('categorias.index')
             ->with('success', 'Categoría inactivada correctamente');
