@@ -7,12 +7,21 @@ use Illuminate\Http\Request;
 
 class AreaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $areas = Area::where('estado', 1)
             ->orderBy('nombre')
             ->get();
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'data'=> $areas
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return view('areas.index', compact('areas'));
     }
 
@@ -27,10 +36,21 @@ class AreaController extends Controller
             'nombre' => 'required|unique:areas,nombre'
         ]);
 
-        Area::create([
+        $area = Area::create([
             'nombre' => $request->nombre,
             'estado' => 1
         ]);
+
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=> 'Area Creada exitosamente',
+                'area' => $area
+            ]);
+        }
+
+        /** RESPUESTA WEB */
 
         return redirect()
             ->route('areas.index')
@@ -52,17 +72,40 @@ class AreaController extends Controller
             'nombre' => $request->nombre
         ]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=> 'Area editada exitosamente',
+                'data'=> $area ->fresh()
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return redirect()
             ->route('areas.index')
             ->with('success', 'Área actualizada correctamente');
     }
 
-    public function destroy(Area $area)
+    public function destroy(Area $area, Request $request)
     {
         $area->update([
             'estado' => 0
         ]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message' => 'Area Inactivada exitosamente',
+                'data'=> [
+                    $area->nombre,
+                    $area->estado
+                ]
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return redirect()
             ->route('areas.index')
             ->with('success', 'Área inactivada correctamente');
