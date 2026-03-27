@@ -169,6 +169,24 @@ class ColaboradorController extends Controller
     public function inactivar(Colaborador $colaborador , Request $request)
     {
 
+        if ($colaborador->estado == 0) {
+            /* RESPUESTA API error */
+            if($request->expectsJson()){
+                return response()->json([
+                    'success'=>false,
+                    'message'=>'El colaborador ya esta inactivo'
+                ]);
+            }
+
+            return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'El colaborador ya está inactivo.');
+        }
+
+        $colaborador->update([
+            'estado' => 0
+        ]);
+
         /* RESPUESTA API */
         if($request->expectsJson()){
             return response()->json([
@@ -179,16 +197,6 @@ class ColaboradorController extends Controller
                 ]
             ]);
         }
-
-        if ($colaborador->estado == 0) {
-        return redirect()
-            ->route('colaboradores.index')
-            ->with('success', 'El colaborador ya está inactivo.');
-        }
-
-        $colaborador->update([
-            'estado' => 0
-        ]);
 
         /** RESPUESTA WEB */
         return redirect()

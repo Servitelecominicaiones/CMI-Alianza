@@ -4,6 +4,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboradorController;
+use App\Http\Controllers\EmpresaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,4 +49,17 @@ Route::get('/colaboradores',[ColaboradorController::class, 'index']);
 Route::post('/colaboradores',[ColaboradorController::class, 'store']);
 Route::put('/colaboradores/{colaborador}',[ColaboradorController::class, 'update']);
 Route::delete('/colaboradores/{colaborador}',[ColaboradorController::class, 'inactivar']);
+
+/*
+|--------------------------------------------------------------------------
+| Rutas Modulo Empresas
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/empresas',[EmpresaController::class,'index']);
+Route::post('/empresas',[EmpresaController::class,'store']);
+Route::put('/empresas/{empresa}',[EmpresaController::class,'update']);
+Route::delete('/empresas/{empresa}',[EmpresaController::class,'inactivar']);
+
+
 
