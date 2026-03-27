@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboradorController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\DocumentoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,5 +73,16 @@ Route::get('/roles',[RolController::class,'index']);
 Route::post('/roles',[RolController::class,'store']);
 Route::put('/roles/{rol}',[RolController::class,'update']);
 Route::delete('/roles/{rol}',[RolController::class,'inactivar']);
+
+/*
+|--------------------------------------------------------------------------
+| Rutas Modulo Documentos    
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/documentos',[DocumentoController::class, 'index']);
+Route::post('/documentos',[DocumentoController::class, 'store']);
+Route::post('/documentos/editar/{documento}',[DocumentoController::class, 'update']);
+Route::delete('/documentos/{documento}',[DocumentoController::class, 'destroy']);
 
 

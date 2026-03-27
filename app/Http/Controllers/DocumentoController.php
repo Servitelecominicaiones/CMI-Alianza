@@ -71,6 +71,14 @@ class DocumentoController extends Controller
             return view('documentos.partials.cards', compact('documentos'));
         }
 
+        /* ================= RESPUESTA API ================= */
+        if($request->expectsJson()){
+            return response() ->json([
+                'success' => true,
+                'data'=> $documentos
+            ]);
+        }
+
         /* ================= VISTA ================= */
 
         return view('documentos.index', [
@@ -223,7 +231,7 @@ class DocumentoController extends Controller
             'extension'          => $extension,
             'tamanio'            => $tamanio,
             'descripcion'        => $request->descripcion,
-            'usuario_carga_id'   => auth()->id(),
+            'usuario_carga_id'   => auth()->id() ?? 1, //asignar usuario de api
             'estado'             => 1,
             'owner_type'         => $ownerType,
             'owner_id'           => $ownerId
@@ -232,11 +240,20 @@ class DocumentoController extends Controller
         /* ===== HISTORIAL ===== */
         HistorialDocumento::create([
             'documento_id' => $documento->id,
-            'usuario_id'   => auth()->id(),
+            'usuario_id'   => auth()->id() ?? 1,//asignar usuario de api
             'accion'       => 'CREAR',
             'ruta_anterior'=> null,
             'ruta_nueva'   => $rutaBD
         ]);
+
+        /* RESPUESTA API */
+        if ($request -> expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Documento creado exitosamente',
+                'data'=> $documento
+            ]);
+        }
 
         /* ===== RESPUESTA ===== */
         
@@ -269,7 +286,7 @@ class DocumentoController extends Controller
         /* ===== HISTORIAL ===== */
         HistorialDocumento::create([
             'documento_id' => $doc->id,
-            'usuario_id'   => auth()->id(),
+            'usuario_id'   => auth()->id() ?? 1,
             'accion'       => 'INACTIVAR',
             'ruta_anterior'=> $doc->ruta_completa,
             'ruta_nueva'   => null
@@ -437,13 +454,22 @@ class DocumentoController extends Controller
             // === REGISTRAR HISTORIAL ===
             HistorialDocumento::create([
                 'documento_id' => $documento->id,
-                'usuario_id' => auth()->id(),
+                'usuario_id' => auth()->id() ?? 1,
                 'accion' => 'EDITAR',
                 'ruta_anterior' => $documento->getOriginal('ruta_completa'),
                 'ruta_nueva' => $nuevaRutaBD
             ]);
 
             DB::commit();
+
+            /* RESPUESTA API */
+            if ($request->expectsJson()){
+                return response() -> json([
+                    'success'=> true,
+                    'message'=> 'Informacion del documento actualizado',
+                    'data'=> $documento->fresh()
+                ]);
+            }
 
             if($request -> filled('from')){
                 return redirect($request->from)
