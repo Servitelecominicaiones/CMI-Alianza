@@ -8,13 +8,23 @@ use Illuminate\Http\Request;
 
 class RolController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $roles = Rol::where('estado', 1)
+            ->with('permisos')
             ->withCount('usuarios')
             ->orderBy('nombre')
             ->get();
 
+        /* RESPUEWSTA API */
+        if($request -> expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'data' => $roles
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return view('roles.index', compact('roles'));
     }
 
@@ -90,6 +100,14 @@ class RolController extends Controller
             }
         }
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Rol creado Exitosamente',
+                'data' => $rol
+            ]);
+        }
         return redirect()
             ->route('roles.index')
             ->with('success', 'Rol creado correctamente');
@@ -174,6 +192,19 @@ class RolController extends Controller
             }
         }
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Rol inactivado Exitosamente',
+                'data' => [
+                    'Rol'=>$rol->nombre,
+                    'Estado'=>$rol->estado
+                ]
+            ]);
+        }
+
+        /* RESPUESTA WEB */
         return redirect()
             ->route('roles.index')
             ->with('success', 'Rol actualizado correctamente');
@@ -209,7 +240,7 @@ class RolController extends Controller
             ->with('success', 'Rol eliminado correctamente');
     }
 
-    public function inactivar(Rol $rol)
+    public function inactivar(Rol $rol, Request $request)
     {
         if ($rol->nombre === 'Administrador') {
             return redirect()
@@ -225,6 +256,15 @@ class RolController extends Controller
 
         $rol->update(['estado' => 0]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Rol creado Exitosamente',
+                'data' => $rol
+            ]);
+        }
+        /* RESPUESTA WEB */
         return redirect()
             ->route('roles.index')
             ->with('success', 'Rol inactivado correctamente');

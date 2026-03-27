@@ -5,6 +5,7 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ColaboradorController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\RolController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,5 +62,15 @@ Route::post('/empresas',[EmpresaController::class,'store']);
 Route::put('/empresas/{empresa}',[EmpresaController::class,'update']);
 Route::delete('/empresas/{empresa}',[EmpresaController::class,'inactivar']);
 
+/*
+|--------------------------------------------------------------------------
+| Rutas Modulo Roles    
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/roles',[RolController::class,'index']);
+Route::post('/roles',[RolController::class,'store']);
+Route::put('/roles/{rol}',[RolController::class,'update']);
+Route::delete('/roles/{rol}',[RolController::class,'inactivar']);
 
 
