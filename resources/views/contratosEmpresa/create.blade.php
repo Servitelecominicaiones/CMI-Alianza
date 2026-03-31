@@ -18,7 +18,8 @@
         </a>
     </div>
 
-    <form action="{{ route('contratosEmpresa.store', $empresa) }}" method="POST">
+    <form action="{{ route('contratosEmpresa.store', $empresa) }}" 
+    method="POST" id="crearContratoForm">
         @csrf
 
         <div class="card mb-4">
@@ -69,3 +70,26 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('crearContratoForm').addEventListener('submit', function(e){
+        e.preventDefault();
+
+        Swal.fire({
+                title: '¿Subir Informacion de Contrato?',
+                text: 'La Empresa Quedara Activada con la informacion de contrato recien ingresada',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Subir',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#6c757d',
+                cancelButtonColor: '#dc3545'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+    });
+</script>
+@endpush

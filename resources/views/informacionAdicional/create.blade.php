@@ -74,13 +74,23 @@
 </style>
 
 <script>
-document.getElementById('formInfoAdicional').addEventListener('submit', function (e) {
-    if (!confirm('¿Está seguro de guardar la información adicional?')) {
+    document.getElementById('formInfoAdicional').addEventListener('submit', function (e) {
         e.preventDefault();
-        return;
-    }
-    document.getElementById('loader-overlay').style.display = 'flex';
-});
+        Swal.fire({
+                title: '¿Subir Informacion de Contrato?',
+                text: 'El Colaborador Quedara Activado con la informacion de contrato recien ingresada',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Subir',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#6c757d',
+                cancelButtonColor: '#dc3545'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+    });
 </script>
 
 @endsection
