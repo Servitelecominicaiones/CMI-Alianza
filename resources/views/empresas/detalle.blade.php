@@ -236,6 +236,15 @@
                                            data-bs-toggle="tooltip">
                                             <i class="bi bi-eye"></i>
                                         </a>
+
+                                        {{-- Subir documento --}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-success btn-subir-documento-empresa"
+                                                data-url="{{ route('contratosEmpresa.documentos.create', $inactivo) }}"
+                                                title="Subir documento"
+                                                data-bs-toggle="tooltip">
+                                            <i class="bi bi-upload"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
