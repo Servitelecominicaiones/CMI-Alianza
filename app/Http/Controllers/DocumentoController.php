@@ -183,13 +183,17 @@ class DocumentoController extends Controller
                 $ownerType = 'contrato';
                 $ownerId = $request->contrato_id;
                 $contrato = Contrato::with('colaborador')->findOrFail($ownerId);
-                $identificador = $contrato->colaborador->numero_identificacion;
+                $identificador = $contrato->colaborador->numero_identificacion . 
+                '-' . $contrato->informacionAdicional->cargo . '-' . $contrato->informacionAdicional->fecha_inicial
+                .'-'. $contrato->informacionAdicional->fecha_terminacion;
 
             }elseif ($request->tipo_propietario === 'contratoEmpresa' && $request->filled('contrato_empresa_id')) {
                 $ownerType = 'contratoEmpresa';
                 $ownerId   = $request->contrato_empresa_id;
                 $contratoEmpresa = ContratoEmpresa::with('empresa')->findOrFail($ownerId);
-                $identificador   = $contratoEmpresa->empresa->nombre_empresa;
+                $identificador   = $contratoEmpresa->empresa->nombre_empresa . '-' .
+                $contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato . '-' .
+                $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato;
             }
         }
 
@@ -390,15 +394,19 @@ class DocumentoController extends Controller
                     $colaboradorNuevo = Colaborador::findOrFail($ownerId);
                     $identificador = $colaboradorNuevo -> numero_identificacion;
                 }elseif ($request->tipo_propietario === 'contrato' && $request->filled('contrato_id')) {
-                        $ownerType    = 'contrato';
-                        $ownerId      = $request->contrato_id;
-                        $contrato     = Contrato::with('colaborador')->findOrFail($ownerId);
-                        $identificador = $contrato->colaborador->numero_identificacion;
+                    $ownerType    = 'contrato';
+                    $ownerId      = $request->contrato_id;
+                    $contrato     = Contrato::with('colaborador')->findOrFail($ownerId);
+                    $identificador = $contrato->colaborador->numero_identificacion . 
+                    '-' . $contrato->informacionAdicional->cargo . '-' . $contrato->informacionAdicional->fecha_inicial
+                    .'-'. $contrato->informacionAdicional->fecha_terminacion;
                 }elseif ($request->tipo_propietario === 'contratoEmpresa' && $request->filled('contrato_empresa_id')) {
                     $ownerType       = 'contratoEmpresa';
                     $ownerId         = $request->contrato_empresa_id;
                     $contratoEmpresa = ContratoEmpresa::with('empresa')->findOrFail($ownerId);
-                    $identificador   = $contratoEmpresa->empresa->nombre_empresa;
+                    $identificador   = $contratoEmpresa->empresa->nombre_empresa . '-' .
+                    $contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato . '-' .
+                    $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato;
                 }
             }
 
