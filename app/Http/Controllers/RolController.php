@@ -260,7 +260,7 @@ class RolController extends Controller
         if($request->expectsJson()){
             return response()->json([
                 'success'=>true,
-                'message'=>'Rol creado Exitosamente',
+                'message'=>'Rol Inactivado Exitosamente',
                 'data' => $rol
             ]);
         }

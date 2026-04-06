@@ -281,7 +281,7 @@ class DocumentoController extends Controller
 
     /* ================= INACTIVAR ================= */
 
-    public function destroy($id)
+    public function destroy($id, Request $request) 
     {
         $doc = Documento::findOrFail($id);
         $doc->estado = 0;
@@ -296,6 +296,16 @@ class DocumentoController extends Controller
             'ruta_nueva'   => null
         ]);
 
+        /* RESPUESTA API */
+        if ($request -> expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Documento inactivado exitosamente',
+            ]);
+        }
+
+
+        /** RESPUESTA WEB */
         return redirect()
             ->route('documentos.index')
             ->with( 'success','Documento Inactivado exitosamente');
