@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ApiAuthController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CategoriaController;
@@ -8,6 +9,21 @@ use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\DocumentoController;
 
+/*
+|--------------------------------------------------------------------------
+| Autenticación API (rutas públicas)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('auth')->group(function () {
+    Route::post('/login', [ApiAuthController::class, 'login']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rutas protegidas con Sanctum
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
 /*
 |--------------------------------------------------------------------------
 | Rutas Modulo Usuarios
@@ -85,4 +101,4 @@ Route::post('/documentos',[DocumentoController::class, 'store']);
 Route::post('/documentos/editar/{documento}',[DocumentoController::class, 'update']);
 Route::delete('/documentos/{documento}',[DocumentoController::class, 'destroy']);
 
-
+});
