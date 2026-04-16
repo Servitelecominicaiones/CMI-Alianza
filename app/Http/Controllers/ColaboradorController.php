@@ -6,23 +6,43 @@ use Illuminate\Http\Request;
 use App\Models\Colaborador;
 use App\Models\Empresa;
 use App\Models\Identificacion;
+use Yajra\DataTables\Facades\DataTables;
 
 class ColaboradorController extends Controller
 {
     public function index(Request $request)
     {
-        $colaboradores = Colaborador::with('identificacion')->get();
         
         /* RESPUESTA API */
-        if($request->expectsJson()){
+        if ($request->expectsJson() && !$request->ajax()) {
+            $colaboradores = Colaborador::with('identificacion')->paginate(50);
             return response()->json([
-                'success'=>true,
-                'data'=> $colaboradores
+                'success' => true,
+                'data'    => $colaboradores->items(),
+                'meta'    => [
+                    'total'        => $colaboradores->total(),
+                    'current_page' => $colaboradores->currentPage(),
+                    'last_page'    => $colaboradores->lastPage(),
+                ]
             ]);
         }
 
-        /** RESPUESTA WEB */
-        return view('colaboradores.index',compact('colaboradores'));
+        /* RESPUESTA DATATABLES (ajax interno de la vista) */
+        if ($request->ajax()) {
+            $query = Colaborador::with('identificacion')->select('colaborador.*')->orderBy('id_colaborador', 'asc');
+
+            return DataTables::of($query)
+                ->addColumn('tipo_identificacion', fn($c) => $c->identificacion->tipo_identificacion ?? '')
+                ->addColumn('nombre_completo', fn($c) => trim("$c->primer_nombre $c->segundo_nombre $c->primer_apellido $c->segundo_apellido"))
+                ->addColumn('estado_badge', fn($c) => $c->estado
+                    ? '<span class="badge bg-success">Activo</span>'
+                    : '<span class="badge bg-secondary">Inactivo</span>')
+                ->rawColumns(['estado_badge'])
+                ->make(true);
+        }
+
+        /* RESPUESTA WEB */
+        return view('colaboradores.index');
     }
 
     public function create()

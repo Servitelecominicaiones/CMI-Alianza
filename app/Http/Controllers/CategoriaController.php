@@ -9,19 +9,24 @@ class CategoriaController extends Controller
 {
     public function index(Request $request)
     {
-        $categorias = Categoria::where('estado', 1)
-            ->orderBy('nombre')
-            ->get();
-
-        /* RESPUESTA API */
+        /**Respuesta APi */
         if($request->expectsJson()){
+            $perPage = $request->query('per_page', 15); // 15 por defecto
+            $categorias = Categoria::where('estado', 1)
+                ->orderBy('nombre')
+                ->paginate($perPage);
+
             return response()->json([
-                'success'=>true,
-                'data'=> $categorias
+                'success' => true,
+                'data' => $categorias
             ]);
         }
 
         /** RESPUESTA WEB */
+        $categorias = Categoria::where('estado',1)
+            ->orderBy('nombre')
+            ->paginate(15);
+            
         return view('categorias.index', compact('categorias'));
     }
 
