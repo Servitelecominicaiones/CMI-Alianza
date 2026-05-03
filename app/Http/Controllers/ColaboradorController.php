@@ -29,7 +29,7 @@ class ColaboradorController extends Controller
 
         /* RESPUESTA DATATABLES (ajax interno de la vista) */
         if ($request->ajax()) {
-            $query = Colaborador::with('identificacion')->select('colaborador.*')->orderBy('id_colaborador', 'asc');
+            $query = Colaborador::with('identificacion')->select('colaborador.*')->orderBy('estado', 'desc');
 
             return DataTables::of($query)
                 ->addColumn('tipo_identificacion', fn($c) => $c->identificacion->tipo_identificacion ?? '')

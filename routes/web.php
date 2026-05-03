@@ -90,6 +90,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('documentos/{documento}/preview', [DocumentoController::class, 'preview'])
         ->name('documentos.preview');
+    
+    Route::get('documentos/search/colaboradores',[DocumentoController::class, 'searchColaboradores'])
+        ->name('documentos.search.colaboradores');
+    
+    Route::get('documentos/search/contratos',[DocumentoController::class, 'searchContratos'])
+        ->name('documentos.search.contratos');
 
     /*
     |--------------------------------------------------------------------------

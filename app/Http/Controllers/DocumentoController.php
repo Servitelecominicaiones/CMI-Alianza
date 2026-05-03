@@ -127,8 +127,8 @@ class DocumentoController extends Controller
             'areas' => Area::where('estado', 1)->get(),
             'categorias' => Categoria::where('estado', 1)->get(),
             'empresas' => Empresa::where('estado',1)->get(),
-            'colaboradores' => Colaborador::where('estado',1)->get(),
-            'contratos' => Contrato::where('estado',1) -> with(['colaborador','empresa','informacionAdicional'])->get(),
+            #'colaboradores' => Colaborador::where('estado',1)->get(),
+            #'contratos' => Contrato::where('estado',1) -> with(['colaborador','empresa','informacionAdicional'])->get(),
             'contratosEmpresa' => ContratoEmpresa::where('estado',1)->with(['empresa','informacionAdicionalEmpresa'])->get()
         ]);
     }
@@ -361,8 +361,8 @@ class DocumentoController extends Controller
             'areas' => Area::where('estado', 1)->get(),
             'categorias' => Categoria::where('estado', 1)->get(),
             'empresas' => Empresa::where('estado',1)->get(),
-            'colaboradores' => Colaborador::where('estado',1)->get(),
-            'contratos' => Contrato::where('estado',1)->with(['colaborador','empresa','informacionAdicional'])->get(),
+            #'colaboradores' => Colaborador::where('estado',1)->get(),
+            #'contratos' => Contrato::where('estado',1)->with(['colaborador','empresa','informacionAdicional'])->get(),
             'contratosEmpresa' => ContratoEmpresa::where('estado',1)->with(['empresa','informacionAdicionalEmpresa'])->get()
         ]);
     }
@@ -524,5 +524,61 @@ class DocumentoController extends Controller
             'categorias'      => Categoria::where('estado', 1)->get(),
         ]);
     }
+    
 
+    // Buscar colaboradores
+    public function searchColaboradores(Request $request)
+    {
+        $q = $request->get('q', '');
+
+        $colaboradores = Colaborador::where('estado', 1)
+            ->where(function($query) use ($q) {
+                $query->where('primer_nombre', 'like', "%$q%")
+                    ->orWhere('primer_apellido', 'like', "%$q%")
+                    ->orWhere('numero_identificacion', 'like', "%$q%");
+        })
+        ->limit(50)
+        ->get(['id_colaborador', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'numero_identificacion']);
+
+        return response()->json([
+            'results' => $colaboradores->map(fn($c) => [
+                'id'                     => $c->id_colaborador,
+                'text'                   => "{$c->primer_nombre} {$c->primer_apellido} - {$c->numero_identificacion}",
+                'primer_nombre'          => $c->primer_nombre,
+                'segundo_nombre'         => $c->segundo_nombre,
+                'primer_apellido'        => $c->primer_apellido,
+                'segundo_apellido'       => $c->segundo_apellido,
+                'numero_identificacion'  => $c->numero_identificacion,
+        ])
+    ]);
+}
+
+    // Buscar contratos de colaborador
+    public function searchContratos(Request $request)
+    {
+        $q = $request->get('q', '');
+
+        $contratos = Contrato::where('estado', 1)
+            ->with(['colaborador', 'empresa', 'informacionAdicional'])
+            ->whereHas('colaborador', fn($query) =>
+                $query->where('primer_nombre', 'like', "%$q%")
+                    ->orWhere('primer_apellido', 'like', "%$q%")
+                    ->orWhere('numero_identificacion', 'like', "%$q%")
+            )
+            ->limit(50)
+            ->get();
+
+        return response()->json([
+            'results' => $contratos->map(fn($c) => [
+                'id'                    => $c->id_contrato,
+                'text'                  => "{$c->colaborador->primer_nombre} {$c->colaborador->primer_apellido}",
+                'primer_nombre'         => $c->colaborador->primer_nombre,
+                'primer_apellido'       => $c->colaborador->primer_apellido,
+                'numero_identificacion' => $c->colaborador->numero_identificacion,
+                'empresa'               => $c->empresa->nombre_empresa,
+                'cargo'                 => $c->informacionAdicional->cargo,
+                
+            ])
+        ]);
+    }
 }

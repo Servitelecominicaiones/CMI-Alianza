@@ -86,35 +86,32 @@
         </div>
 
         {{-- ========== SELECTOR DE COLABORADOR ========== --}}
+
         <div class="mb-3" id="selector_colaborador" style="display: {{ $documento->owner_type === 'colaborador' ? 'block' : 'none' }};">
             <label class="form-label">Colaborador <span class="text-danger">*</span></label>
-            <select name="colaborador_id" id="colaborador_id" class="form-select select2">
-                <option value="">-- Seleccione un colaborador --</option>
-                @foreach($colaboradores as $colaborador)
-                    <option value="{{ $colaborador->id_colaborador }}"
-                        {{ $documento->owner_type === 'colaborador' && $documento->owner_id == $colaborador->id_colaborador ? 'selected' : '' }}>
-                        {{ $colaborador->primer_nombre }} 
-                        {{ $colaborador->primer_apellido }} - 
-                        {{ $colaborador->numero_identificacion }}
-                    </option>
-                @endforeach
+            <select name="colaborador_id" id="colaborador_id" class="form-select select2-ajax">
+                {{-- En edit, pre-cargar el valor actual --}}
+                @isset($documento)
+                    @if($documento->owner_type === 'colaborador')
+                        <option value="{{ $documento->owner_id }}" selected>
+                            {{ $documento->owner->primer_nombre }} {{ $documento->owner->primer_apellido }}
+                            - {{ $documento->owner->numero_identificacion }}
+                        </option>
+                    @endif
+                @endisset
             </select>
         </div>
 
-        {{-- selector de contrato Colaborador --}}
+        {{-- ========== SELECTOR DE CONTRATO COLABORADOR ========== --}}
         <div class="mb-3" id="selector_contrato" style="display: {{ $documento->owner_type === 'contrato' ? 'block' : 'none' }};">
-            <select name="contrato_id" id="contrato_id" class="form-select select2">
-                <option value="">-- Seleccione un contrato --</option>
-                @foreach($contratos as $contrato)
-                    <option value="{{ $contrato->id_contrato }}"
-                        {{ $documento->owner_type === 'contrato' && $documento->owner_id == $contrato->id_contrato ? 'selected' : '' }}>
-                        {{ $contrato->colaborador->primer_nombre }}
-                        {{ $contrato->colaborador->primer_apellido }}
-                        — {{ $contrato->colaborador->numero_identificacion }}
-                        — {{ $contrato->empresa->nombre_empresa }}
-                        — {{ $contrato->informacionAdicional->cargo }}
-                    </option>
-                @endforeach
+            <label class="form-label">Contrato <span class="text-danger">*</span></label>
+            <select name="contrato_id" id="contrato_id" class="form-select select2-ajax">
+                @isset($documento)
+                    @if($documento->owner_type === 'contrato')
+                        <option value="{{ $documento->owner_id }}" selected>    
+                            </option>
+                    @endif
+                @endisset
             </select>
         </div>
 
@@ -205,15 +202,6 @@ document.getElementById('tipo_propietario').addEventListener('change', function(
     }
 });
 
-/*====  Select2 ==== */
-$(document).ready(function() {
-    $('.select2').select2({
-        placeholder: "Escribe para Buscar...",
-        allowClear: true,
-        width: '100%',
-        theme: 'bootstrap-5'
-    });
-});
 
 document.getElementById('formEditar').addEventListener('submit', function(e){
     e.preventDefault();
@@ -235,6 +223,84 @@ document.getElementById('formEditar').addEventListener('submit', function(e){
             this.submit();
         }
     });
+});
+
+$(document).ready(function() {
+
+    // Select2 normal — OJO: NO uses clase genérica select2 en los campos AJAX
+    $('.select2:not(.select2-ajax)').select2({
+        placeholder: "Escribe para Buscar...",
+        allowClear: true,
+        width: '100%',
+        theme: 'bootstrap-5'
+    });
+
+    // Select2 AJAX — colaborador
+    $('#colaborador_id').select2({
+        placeholder: "Escribe para buscar...",
+        allowClear: true,
+        width: '100%',
+        theme: 'bootstrap-5',
+        minimumInputLength: 2,
+        ajax: {
+            url: '{{ route("documentos.search.colaboradores") }}',
+            dataType: 'json',
+            delay: 300,
+            data: params => ({ q: params.term }),
+            processResults: data => ({ results: data.results }),
+            cache: true
+        },
+        templateResult: function(colaborador) {
+            if (colaborador.loading) return "Buscando...";
+
+            return $(`
+                <div>
+                    <strong>${colaborador.primer_nombre} ${colaborador.segundo_nombre ?? ''} ${colaborador.primer_apellido} ${colaborador.segundo_apellido ?? ''}</strong><br>
+                    <small>CC: ${colaborador.numero_identificacion}</small>
+                </div>
+            `);
+        },
+        templateSelection: function(colaborador) {
+            if (!colaborador.primer_nombre) return colaborador.text;
+            return `${colaborador.primer_nombre} ${colaborador.primer_apellido} - ${colaborador.numero_identificacion}`;
+        }
+    });
+
+    // Select2 AJAX — contrato colaborador
+    $('#contrato_id').select2({
+        placeholder: "Escribe para buscar...",
+        allowClear: true,
+        width: '100%',
+        theme: 'bootstrap-5',
+        minimumInputLength: 2,
+        ajax: {
+            url: '{{ route("documentos.search.contratos") }}',
+            dataType: 'json',
+            delay: 300,
+            data: params => ({ q: params.term }),
+            processResults: data => ({ results: data.results }),
+            cache: true
+        },
+        templateResult: function(contrato) {
+            if (contrato.loading) return "Buscando...";
+    
+            return $(`
+                <div>
+                    <strong>${contrato.primer_nombre} ${contrato.primer_apellido}</strong><br>
+                    <small>CC: ${contrato.numero_identificacion}</small><br>
+                    <small>Empresa: ${contrato.empresa}</small><br>
+                    <small>Cargo: ${contrato.cargo}</small>
+                </div>
+            `);
+        },
+        // Lo que se muestra una vez seleccionado
+        templateSelection: function(contrato) {
+            if (!contrato.primer_nombre) return contrato.text;
+            return `${contrato.primer_nombre} ${contrato.primer_apellido} — ${contrato.cargo}`;
+        }
+
+    });
+    
 });
 </script>
 @endpush
