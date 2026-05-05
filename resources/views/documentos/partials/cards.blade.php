@@ -94,13 +94,10 @@
 
 @endforeach
 
-<div class="col-12">
-    {{ $documentos->links() }}
-</div>
-
 <!-- SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+@push('scripts')
 <script>
     document.getElementById('formInactivar').addEventListener('submit', function(e){
             e.preventDefault()
@@ -125,3 +122,4 @@
             });
         });
 </script>
+@endpush

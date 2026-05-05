@@ -108,7 +108,11 @@
             <select name="contrato_id" id="contrato_id" class="form-select select2-ajax">
                 @isset($documento)
                     @if($documento->owner_type === 'contrato')
-                        <option value="{{ $documento->owner_id }}" selected>    
+                        <option value="{{ $documento->owner_id }}" selected>
+                            {{ $documento->owner->colaborador->primer_nombre }} {{ $documento->owner->colaborador->primer_apellido }}
+                            - {{ $documento->owner->colaborador->numero_identificacion }}
+                            - {{ $documento->owner->empresa->nombre_empresa}}
+                            - {{ $documento->owner->informacionAdicional->cargo }}
                             </option>
                     @endif
                 @endisset
@@ -296,7 +300,7 @@ $(document).ready(function() {
         // Lo que se muestra una vez seleccionado
         templateSelection: function(contrato) {
             if (!contrato.primer_nombre) return contrato.text;
-            return `${contrato.primer_nombre} ${contrato.primer_apellido} — ${contrato.cargo}`;
+            return `${contrato.primer_nombre} ${contrato.primer_apellido} — ${contrato.numero_identificacion} — ${contrato.empresa} — ${contrato.cargo}`;
         }
 
     });

@@ -85,17 +85,14 @@
     @include('documentos.partials.cards', ['documentos' => $documentos])
 </div>
 
+<div class="col-12">
+    {{ $documentos->links('pagination::bootstrap-5') }}
+</div>
+
 <div id="loader" class="text-center my-4 d-none">
     <span>Cargando...</span>
 </div>
 
-@if($documentos->hasMorePages())
-<button id="btn-cargar-mas"
-        data-url="{{ $documentos->nextPageUrl() }}"
-        class="btn btn-outline-primary mt-3">
-    Cargar más
-</button>
-@endif
 
 
 @endsection
