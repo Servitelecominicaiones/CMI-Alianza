@@ -63,7 +63,9 @@
         </table>
     </div>
 
-    {{ $historial->links() }}
+    <div class="mt-3 d-flex justify-content-center">
+        {{ $historial->links('pagination::bootstrap-5') }}
+    </div>
 
 </div>
 @endsection

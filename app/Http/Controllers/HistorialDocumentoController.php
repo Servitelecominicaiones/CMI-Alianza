@@ -33,7 +33,7 @@ class HistorialDocumentoController extends Controller
             ]);
         }
 
-        $historial = $query->paginate(20);
+        $historial = $query->paginate(20)->withQueryString();
 
         return view('historial_documentos.index', compact('historial'));
     }
