@@ -10,8 +10,8 @@ class EmpresaController extends Controller
 {
     public function index(Request $request)
     {
-        $empresas = Empresa::get();
-        
+        $empresas = Empresa::orderBy('estado', 'desc')->get();
+
         /** RESPUESTA API **/
 
         if ($request->expectsJson()){

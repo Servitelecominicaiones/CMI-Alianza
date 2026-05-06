@@ -113,7 +113,7 @@
                         <option value="{{ $contratoEmpresa->id_contrato_empresa }}">
                             {{ $contratoEmpresa->empresa->nombre_empresa }} 
                             - Inicio Contrato: {{ $contratoEmpresa->informacionAdicionalEmpresa->inicio_contrato}}
-                            - Finalizacion Contrato: {{ $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato }}
+                            - Finalizacion Contrato: {{ $contratoEmpresa->informacionAdicionalEmpresa->finalizacion_contrato ? : 'No especificada'}} 
                         </option>
                     @endforeach
                 </select>
