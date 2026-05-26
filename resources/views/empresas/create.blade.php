@@ -140,15 +140,29 @@
 </style>
 
 <script>
-document.getElementById('formCrearEmpresa').addEventListener('submit', function (e) {
+document.getElementById('formCrearEmpresa').addEventListener('submit', function(e){
+            e.preventDefault()
 
-    if (!confirm('¿Está seguro de crear esta empresa?')) {
-        e.preventDefault();
-        return;
-    }
+            Swal.fire({
+                title: '¿Estas seguro(a) de Crear esta Empresa?',
+                text: 'Se incluira la informcion de esta enmpresa dentro del sistema',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Crear',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-    document.getElementById('loader-overlay').style.display = 'flex';
-});
+                    // Mostrar loader
+                    document.getElementById('loader-overlay').style.display = 'flex';
+
+                    this.submit();
+                }
+            });
+        });
+</script>
 </script>
 
 @endsection

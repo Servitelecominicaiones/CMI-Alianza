@@ -200,15 +200,28 @@
 </style>
 
 <script>
-document.getElementById('formCrearColaborador').addEventListener('submit', function (e) {
+document.getElementById('formCrearColaborador').addEventListener('submit', function(e){
+            e.preventDefault()
 
-    if (!confirm('¿Está seguro de crear este colaborador?')) {
-        e.preventDefault();
-        return;
-    }
+            Swal.fire({
+                title: '¿Estas seguro(a) de Crear este colaborador?',
+                text: 'Se incluira la informcion de este colaborador dentro del sistema',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Crear',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-    document.getElementById('loader-overlay').style.display = 'flex';
-});
+                    // Mostrar loader
+                    document.getElementById('loader-overlay').style.display = 'flex';
+
+                    this.submit();
+                }
+            });
+        });
 </script>
 
 @endsection
