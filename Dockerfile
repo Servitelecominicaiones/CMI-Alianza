@@ -29,6 +29,9 @@ RUN composer install --optimize-autoloader --no-dev
 # Permisos para Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 EXPOSE 9000
-CMD ["php-fpm"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
