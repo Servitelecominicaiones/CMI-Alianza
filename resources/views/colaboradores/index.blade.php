@@ -44,6 +44,13 @@
 
 @push('scripts')
 <script>
+// Traemos los permisos del usuario desde la sesión de Laravel a JS
+const permisosUsuario = @json(session('permisos_usuario', []));
+
+function tienePermiso(permiso) {
+    return permisosUsuario.includes(permiso);
+}
+
 $(document).ready(function () {
     $('#tablaColaboradores').DataTable({
         processing: true,
@@ -57,6 +64,7 @@ $(document).ready(function () {
             { 
                 data: null, orderable: false, searchable: false,
                 render: function(data) {
+                    if (!tienePermiso('documentos.ver')) return '';
                     return `<a href="/colaboradores/${data.id_colaborador}/documentos" class="btn btn-sm btn-info">
                                 <i class="bi bi-file-earmark-text"></i>
                             </a>`;
@@ -64,7 +72,9 @@ $(document).ready(function () {
             },
             { 
                 data: null, orderable: false, searchable: false,
-                render: function(data) {
+                render: function(data) 
+                {
+                    if (!tienePermiso('colaboradores.ver')) return '';
                     return `<a href="/colaboradores/${data.id_colaborador}/detalle" class="btn btn-sm btn-primary">
                                 <i class="bi bi-eye"></i>
                             </a>`;
@@ -77,21 +87,31 @@ $(document).ready(function () {
             { 
                 data: null, orderable: false, searchable: false,
                 render: function(data) {
-                    let botones = `<a href="/colaboradores/${data.id_colaborador}/edit" 
+                    let botones = '';
+            
+                    if (tienePermiso('colaboradores.editar')) {
+                        botones += `<a href="/colaboradores/${data.id_colaborador}/edit" 
                                       class="btn btn-sm btn-warning">
                                        <i class="bi bi-pencil"></i>
                                    </a>`;
-                    if (data.estado) {
-                        botones += `<button type="button"
-                                        class="btn btn-sm btn-danger btn-inactivar-contrato ms-1"
-                                        data-url="/colaboradores/${data.id_colaborador}/contrato/modal-inactivar"> 
-                                        <i class="bi bi-person-x"></i>
-                                    </button>`;
-                    } else {
-                        botones += `<a href="/colaboradores/${data.id_colaborador}/informacion-adicional/crear" class="btn btn-sm btn-success ms-1">
-                                       <i class="bi bi-file-earmark-plus"></i>
-                                    </a>`;
                     }
+            
+                    if (data.estado) {
+                        if (tienePermiso('colaboradores.eliminar')) {
+                            botones += `<button type="button"
+                                            class="btn btn-sm btn-danger btn-inactivar-contrato ms-1"
+                                            data-url="/colaboradores/${data.id_colaborador}/contrato/modal-inactivar"> 
+                                            <i class="bi bi-person-x"></i>
+                                        </button>`;
+                        }
+                    } else {
+                        if (tienePermiso('colaboradores.crear')) {
+                            botones += `<a href="/colaboradores/${data.id_colaborador}/informacion-adicional/crear" class="btn btn-sm btn-success ms-1">
+                                           <i class="bi bi-file-earmark-plus"></i>
+                                        </a>`;
+                        }
+                    }
+            
                     return botones;
                 }
             },
