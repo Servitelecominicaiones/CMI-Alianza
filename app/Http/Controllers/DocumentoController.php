@@ -605,7 +605,7 @@ class DocumentoController extends Controller
                 'usuario_id' => auth()->id() ?? 1,
                 'accion' => 'ELIMINAR PERMANENTE',
                 'ruta_anterior' => $documento->getOriginal('ruta_completa'),
-                'ruta_nueva' => $nuevaRutaBD
+                'ruta_nueva' => '-'
             ]);
 
         $documento->delete();
