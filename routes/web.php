@@ -70,6 +70,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('documentos.destroy')
         ->middleware('permission:documentos.eliminar');
 
+    Route::patch('/documentos/{documento}/activar', [DocumentoController::class, 'activar'])
+        ->name('documentos.activar')
+        ->middleware('permission:documentos.editar');
+
+    Route::delete('/documentos/{documento}/eliminar-permanente', [DocumentoController::class, 'eliminarPermanente'])
+        ->name('documentos.eliminarPermanente')
+        ->middleware('permission:documentos.eliminar');
+    
     Route::post('documentos/{id}/duplicar', [DocumentoController::class,'duplicar'])
         ->name('documentos.duplicar');
 

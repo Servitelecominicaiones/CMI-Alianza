@@ -581,4 +581,35 @@ class DocumentoController extends Controller
             ])
         ]);
     }
+
+        public function activar(Documento $documento)
+    {
+        $documento->update(['estado' => 1]);
+
+        return redirect()->back()->with('success', 'Documento activado correctamente.');
+    }
+
+    public function eliminarPermanente(Documento $documento)
+    {
+        if (!$documento->puedeEliminarse()) {
+            return redirect()->back()->with('error', 'Este documento aún no puede eliminarse permanentemente.');
+        }
+
+        // Elimina el archivo físico del storage antes del registro
+        if ($documento->ruta_completa && \Storage::exists($documento->ruta_completa)) {
+            \Storage::delete($documento->ruta_completa);
+        }
+
+        HistorialDocumento::create([
+                'documento_id' => $documento->id,
+                'usuario_id' => auth()->id() ?? 1,
+                'accion' => 'ELIMINAR PERMANENTE',
+                'ruta_anterior' => $documento->getOriginal('ruta_completa'),
+                'ruta_nueva' => $nuevaRutaBD
+            ]);
+
+        $documento->delete();
+
+        return redirect()->back()->with('success', 'Documento eliminado permanentemente.');
+    }
 }

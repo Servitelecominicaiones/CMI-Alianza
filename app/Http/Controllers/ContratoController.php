@@ -60,12 +60,21 @@ class ContratoController extends Controller
         return view('contratos.ver-info', compact('contrato'));
     }
 
-    public function documentos(Contrato $contrato){
-        $documentos = $contrato->documentos()
-                    ->with(['categoria','area','usuario'])
-                    ->orderBy('created_at')
-                    ->get();
-        return view('contratos.documentos', compact('documentos','contrato'));
+    public function documentos(Contrato $contrato)
+    {
+        $documentosActivos = $contrato->documentos()
+            ->where('estado', 1)
+            ->with(['categoria', 'area', 'usuario'])
+            ->orderBy('created_at')
+            ->get();
+    
+        $documentosInactivos = $contrato->documentos()
+            ->where('estado', 0)
+            ->with(['categoria', 'area', 'usuario'])
+            ->orderBy('created_at')
+            ->get();
+    
+        return view('contratos.documentos', compact('documentosActivos', 'documentosInactivos', 'contrato'));
     }
 }
 
