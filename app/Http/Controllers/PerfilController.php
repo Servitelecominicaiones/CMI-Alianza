@@ -48,6 +48,7 @@ class PerfilController extends Controller
 
         $usuario->update([
             'password' => CryptoHelper::Enc('enc', $request->password),
+            'password_changed_at' => now(),
         ]);
 
         if ($request->expectsJson()) {

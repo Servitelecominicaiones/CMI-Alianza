@@ -17,10 +17,15 @@ class User extends Authenticatable
         'email',
         'password',
         'rol_id',
-        'estado'
+        'estado',
+        'password_changed_at',
     ];
 
     protected $hidden = ['password'];
+
+    protected $casts = [
+        'password_changed_at' => 'datetime',
+    ];
 
     /* ======================
      | Relaciones
@@ -67,5 +72,15 @@ class User extends Authenticatable
     public function esViewer(): bool
     {
         return $this->rol && $this->rol->nombre === 'Viewer Documental';
+    }
+
+    /* ======================
+     | Seguridad de contraseña
+     ====================== */
+
+    public function debeCambiarPassword(): bool
+    {
+        return is_null($this->password_changed_at)
+            || $this->password_changed_at->diffInDays(now()) >= 30;
     }
 }
