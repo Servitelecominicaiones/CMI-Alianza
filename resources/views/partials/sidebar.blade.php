@@ -105,6 +105,14 @@
         <li class="nav-heading">Sistema</li>
 
         <li class="nav-item">
+            <a href="{{ route('perfil.index') }}"
+            class="nav-link {{ request()->routeIs('perfil.*') ? 'active' : '' }}">
+                <i class="bi bi-person-circle"></i>
+                <span>Mi Perfil</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
             <form method="POST" action="{{ route('logout') }}">
             @csrf
                 <button class="nav-link btn btn-link text-start">

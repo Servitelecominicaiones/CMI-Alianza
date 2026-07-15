@@ -16,6 +16,7 @@ use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\InformacionAdicionalController;
 use App\Http\Controllers\ContratoController;
 use App\Http\Controllers\ContratoEmpresaController;
+use App\Http\Controllers\PerfilController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,17 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [dashboardController::class, 'index'])
         ->name('dashboard');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Perfil
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/perfil', [PerfilController::class, 'index'])
+        ->name('perfil.index');
+
+    Route::put('/perfil/password', [PerfilController::class, 'actualizarPassword'])
+        ->name('perfil.password');
 
     /*
     |--------------------------------------------------------------------------

@@ -31,3 +31,6 @@ auth.json
 
 # Dumps Db
 *.sql
+
+#Contexto proyecto
+*.md
