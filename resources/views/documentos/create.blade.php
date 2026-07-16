@@ -63,12 +63,12 @@
             {{-- Tipo De Propietario --}}
             <div class="mb-3">
                 <label class="form-label">Asignar documento a:</label>
-                <select name="tipo_propietario" id="tipo_propietario" class="form-select">
-                    <option value="">Documento General (Sin asignar)</option>
+                <select name="tipo_propietario" id="tipo_propietario" class="form-select" required>
+                    <option value="" selected disabled>Seleccione un tipo de propietario</option>
                     <option value="empresa">Empresa</option>
                     <option value="colaborador">Colaborador</option>
                     <option value="contrato">Contrato Colaborador</option>
-                    <option value="contratoEmpresa">Contrato Empresa</option>
+                    <option value="contratoEmpresa">Contrato Empresa</option>|
                 </select>
                 <small class="text-muted">
                     Puede asignar este documento a empresas,colaboradores o contratos específicos

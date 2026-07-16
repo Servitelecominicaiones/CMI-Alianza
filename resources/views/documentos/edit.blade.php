@@ -49,9 +49,9 @@
         {{-- ========== TIPO DE PROPIETARIO ========== --}}
         <div class="mb-3">
             <label class="form-label">Asignar documento a:</label>
-            <select name="tipo_propietario" id="tipo_propietario" class="form-select">
-                <option value="" {{ !$documento->owner_type ? 'selected' : '' }}>
-                    Documento General (Sin asignar)
+            <select name="tipo_propietario" id="tipo_propietario" class="form-select" required>
+                <option value="" selected disabled {{ !$documento->owner_type ? 'selected' : '' }}>
+                    Seleccione un tipo de propietario
                 </option>
                 <option value="empresa" {{ $documento->owner_type === 'empresa' ? 'selected' : '' }}>
                     Empresa
