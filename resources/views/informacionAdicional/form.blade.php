@@ -29,7 +29,8 @@
             <div class="col-md-6 mb-3">
             <label class="form-label">Empresa</label>
             <select name="id_empresa"
-                    class="form-select @error('id_empresa') is-invalid @enderror"
+                    id="select-empresa"
+                    class="form-select select2-empresa @error('id_empresa') is-invalid @enderror"
                     required>
                 <option value="">Seleccione una empresa</option>
                 @foreach($empresas as $empresa)
@@ -368,3 +369,17 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function () {
+        $('#select-empresa').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione una empresa',
+            width: '100%',
+            language: 'es',
+            dropdownParent: $('#select-empresa').parent() // evita problemas de z-index si algún día está en un modal
+        });
+    });
+</script>
+@endpush

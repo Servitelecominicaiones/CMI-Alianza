@@ -143,7 +143,7 @@
 
     {{-- Bloque desplegable: Documentos inactivos --}}
     <div class="card">
-        <div class="card-header bg-secondary text-white">
+        <div class="card-header bg-secondary text-white d-flex justify-content-start gap-3 align-items-center">
             <button class="btn btn-sm btn-light d-flex align-items-center gap-2"
                     type="button"
                     data-bs-toggle="collapse"
@@ -153,6 +153,10 @@
                 <i class="bi bi-chevron-down"></i>
                 Ver documentos inactivos ({{ $documentosInactivos->count() }})
             </button>
+
+            <p class="mb-0">
+                 (Solo se puede eliminar permanentemente un documento inactivo después de 60 días de inactivación)
+            </p>
         </div>
 
         <div class="collapse" id="documentosInactivosCollapse">
@@ -225,17 +229,34 @@
                                                 @endif
 
                                                 @if (in_array('documentos.eliminar', session('permisos_usuario', [])))
+                                                    @php
+                                                        $puedeEliminar = $documento->puedeEliminarse();
+                                                        $diasFaltantes = $documento->diasRestantesParaEliminar();
+
+                                                        $tituloEliminar = $puedeEliminar
+                                                            ? 'Eliminar permanentemente'
+                                                            : ($diasFaltantes === 1
+                                                                ? 'Podrás eliminarlo en 1 día'
+                                                                : "Podrás eliminarlo en {$diasFaltantes} días");
+                                                    @endphp
+
                                                     {{-- Eliminar permanentemente --}}
                                                     <form method="POST"
                                                         action="{{ route('documentos.eliminarPermanente', $documento) }}"
                                                         class="d-inline form-eliminar-permanente">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-dark"
-                                                            data-bs-toggle="tooltip" title="Eliminar permanentemente"
-                                                            {{ $documento->puedeEliminarse() ? '' : 'disabled' }}>
-                                                            <i class="bi bi-trash3-fill"></i>
-                                                        </button>
+
+                                                        <span tabindex="0"
+                                                              data-bs-toggle="tooltip"
+                                                              data-bs-trigger = "hover"
+                                                              title="{{ $tituloEliminar }}"
+                                                              {{ !$puedeEliminar ? 'style=display:inline-block' : '' }}>
+                                                            <button type="submit" class="btn btn-sm btn-dark"
+                                                                {{ $puedeEliminar ? '' : 'disabled' }}>
+                                                                <i class="bi bi-trash3-fill"></i>
+                                                            </button>
+                                                        </span>
                                                     </form>
                                                 @endif
 
