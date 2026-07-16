@@ -65,6 +65,7 @@ class UsuarioController extends Controller
             'password' => CryptoHelper::Enc('enc',$request->password),
             'rol_id'   => $request->rol_id,
             'estado'   => $request->estado,
+            'password_changed_at' => now(),
         ]);
 
         /** RESPUESTA API **/
@@ -122,6 +123,7 @@ class UsuarioController extends Controller
         // SOLO si escribió contraseña
         if ($request->filled('password')) {
             $data['password'] = CryptoHelper::Enc('enc',$request->password);
+            $data['password_changed_at'] = now();
         }
 
         $usuario->update($data);

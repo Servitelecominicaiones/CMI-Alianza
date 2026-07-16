@@ -259,11 +259,13 @@ class ColaboradorController extends Controller
         $contratoActivo = $colaborador->contratos()
             ->where('estado', 1)
             ->with(['empresa', 'informacionAdicional'])
+            ->withCount('documentos')
             ->first();
         
         $contratosInactivos = $colaborador->contratos()
             ->where('estado',0)
             ->with(['empresa','informacionAdicional'])
+            ->withCount('documentos')
             ->orderBy('id_contrato','desc')
             ->get();
 

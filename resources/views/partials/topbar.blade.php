@@ -15,6 +15,12 @@
                     Rol: {{ session('rol_nombre') }}
                 </span>
             </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <a class="dropdown-item" href="{{ route('perfil.index') }}">
+                    <i class="bi bi-person-circle me-2"></i> Mi Perfil
+                </a>
+            </li>
         </ul>
     </div>
 </nav>

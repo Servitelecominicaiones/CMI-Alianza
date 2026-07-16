@@ -6,7 +6,7 @@
     <h4 class="mb-3">Historial de Documentos</h4>
 
     <div class="table-responsive">
-        <table class="table table-striped table-bordered align-middle">
+        <table class="table table-striped table-bordered align-middle" id="tablaHistorial">
             <thead class="table-dark">
                 <tr>
                     <th>Fecha</th>
@@ -30,7 +30,7 @@
 
 
                         <td>
-                            {{ $h->documento->nombre_original ?? 'Documento eliminado' }}
+                            {{ $h->nombre_documento ?? 'Documento eliminado' }}
                         </td>
 
                         <td>
@@ -69,3 +69,36 @@
 
 </div>
 @endsection
+
+
+@push('scripts')
+
+    <script>
+    $(document).ready(function () {
+        $('#tablaHistorial').DataTable({
+            language: {
+                url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+            },
+
+            dom: 
+                "<'row mb-3'<'col-md-6'B><'col-md-6'f>>" +
+                "<'row'<'col-12'tr>>" +
+                "<'row mt-3'<'col-md-6'l><'col-md-6'p>>",
+
+            order: [[0, 'desc']], // Fecha DESC
+
+            buttons: [{
+                extend: 'excel',
+                text: '<i class="bi bi-file-earmark-excel"></i> Exportar a excel',
+                className: 'btn btn-success',
+                title: 'Historial de Documentos',
+                exportOptions: {
+                    columns: [0,1,2,3,4,5]
+                    }
+                }
+            ]
+        });
+    });
+    </script>
+
+@endpush

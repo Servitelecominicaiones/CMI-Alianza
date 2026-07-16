@@ -64,6 +64,18 @@ class Documento extends Model
         return $this->updated_at->diffInDays(now()) >= 60;
     }
 
+    public function diasRestantesParaEliminar()
+    {
+        if ($this->estado == 1) {
+            return null; // No aplica: el documento sigue activo
+        }
+
+        $diasTranscurridos = $this->updated_at->diffInDays(now());
+        $diasFaltantes = 60 - $diasTranscurridos;
+
+        return (int) max($diasFaltantes, 0);
+    }
+
     public function previewUrl()
     {
         // Ruta protegida

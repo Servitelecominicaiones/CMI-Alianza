@@ -74,6 +74,7 @@
 
 <!-- Select2 script -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
 
 <!-- DataTables -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -87,8 +88,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
-@stack('scripts')
-
 @if (session('success'))
 <script>
 Swal.fire({
@@ -99,6 +98,16 @@ Swal.fire({
 });
 </script>
 @endif
+
+@if(auth()->check() && auth()->user()->debeCambiarPassword() && !request()->routeIs('perfil.index'))
+    @include('partials.modal-forzar-password')
+@endif
+
+{{-- @stack debe ir al final: cualquier @push declarado en vistas/partials incluidos arriba
+     (como el modal de cambio de contraseña forzado) solo se vuelca aquí si @stack se
+     evalúa después de que esos @push ya se ejecutaron. --}}
+@stack('scripts')
+
 <div id="loader-overlay" style="
     display:none;
     position:fixed;

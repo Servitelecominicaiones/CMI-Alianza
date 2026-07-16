@@ -245,6 +245,7 @@ class DocumentoController extends Controller
         HistorialDocumento::create([
             'documento_id' => $documento->id,
             'usuario_id'   => auth()->id() ?? 1,//asignar usuario de api
+            'nombre_documento' => $documento->nombre_original,
             'accion'       => 'CREAR',
             'ruta_anterior'=> null,
             'ruta_nueva'   => $rutaBD
@@ -291,6 +292,7 @@ class DocumentoController extends Controller
         HistorialDocumento::create([
             'documento_id' => $doc->id,
             'usuario_id'   => auth()->id() ?? 1,
+            'nombre_documento' => $doc->nombre_original,
             'accion'       => 'INACTIVAR',
             'ruta_anterior'=> $doc->ruta_completa,
             'ruta_nueva'   => null
@@ -306,9 +308,8 @@ class DocumentoController extends Controller
 
 
         /** RESPUESTA WEB */
-        return redirect()
-            ->route('documentos.index')
-            ->with( 'success','Documento Inactivado exitosamente');
+        return redirect()->back()
+            ->with('success', 'Documento Inactivado exitosamente');
         
     }
 
@@ -473,6 +474,7 @@ class DocumentoController extends Controller
             HistorialDocumento::create([
                 'documento_id' => $documento->id,
                 'usuario_id' => auth()->id() ?? 1,
+                'nombre_documento' => $documento->nombre_original,
                 'accion' => 'EDITAR',
                 'ruta_anterior' => $documento->getOriginal('ruta_completa'),
                 'ruta_nueva' => $nuevaRutaBD
@@ -580,5 +582,50 @@ class DocumentoController extends Controller
                 
             ])
         ]);
+    }
+
+    public function activar(Documento $documento)
+    {
+        $documento->update(['estado' => 1]);
+
+        HistorialDocumento::create([
+            'documento_id' => $documento->id,
+            'usuario_id' => auth()->id() ?? 1,
+            'nombre_documento' => $documento->nombre_original,
+            'accion' => 'Activar',
+            'ruta_anterior' => null,
+            'ruta_nueva' => $documento->getOriginal('ruta_completa')
+        ]);
+
+        return redirect()->back()->with('success', 'Documento activado correctamente.');
+    }
+
+    public function eliminarPermanente(Documento $documento)
+    {
+        if (!$documento->puedeEliminarse()) {
+            return redirect()->back()->with('error', 'Este documento aún no puede eliminarse permanentemente.');
+        }
+
+        // Elimina el archivo físico directamente de la carpeta public/
+        if ($documento->ruta_completa) {
+            $rutaFisica = public_path($documento->ruta_completa);
+
+            if (file_exists($rutaFisica)) {
+                unlink($rutaFisica);
+            }
+        }
+
+        HistorialDocumento::create([
+                'documento_id' => $documento->id,
+                'usuario_id' => auth()->id() ?? 1,
+                'nombre_documento' => $documento->nombre_original,
+                'accion' => 'ELIMINAR PERMANENTE',
+                'ruta_anterior' => $documento->getOriginal('ruta_completa'),
+                'ruta_nueva' => '-'
+            ]);
+
+        $documento->delete();
+
+        return redirect()->back()->with('success', 'Documento eliminado permanentemente.');
     }
 }
