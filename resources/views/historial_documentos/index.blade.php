@@ -30,7 +30,7 @@
 
 
                         <td>
-                            {{ $h->documento->nombre_original ?? 'Documento eliminado' }}
+                            {{ $h->nombre_documento ?? 'Documento eliminado' }}
                         </td>
 
                         <td>
@@ -84,6 +84,8 @@
                 "<'row mb-3'<'col-md-6'B><'col-md-6'f>>" +
                 "<'row'<'col-12'tr>>" +
                 "<'row mt-3'<'col-md-6'l><'col-md-6'p>>",
+
+            order: [[0, 'desc']], // Fecha DESC
 
             buttons: [{
                 extend: 'excel',

@@ -12,7 +12,7 @@ class HistorialDocumentoController extends Controller
     public function index(Request $request)
     {
         $query = HistorialDocumento::with(['documento', 'usuario'])
-            ->orderByDesc('created_at');
+            ->orderByDesc('id');
 
         if ($request->documento_id) {
             $query->where('documento_id', $request->documento_id);
