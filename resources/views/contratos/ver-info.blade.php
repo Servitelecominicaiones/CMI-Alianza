@@ -152,6 +152,29 @@
             </div>
         </div>
 
+        {{-- Ubicación Física del Expediente --}}
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <i class="bi bi-archive me-2"></i> Ubicación Física del Expediente
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Ubicación de Caja</label>
+                        <p class="form-control-plaintext fw-semibold">{{ filled($info->cajaUbica) ? $info->cajaUbica : '—' }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Carpeta Inicial</label>
+                        <p class="form-control-plaintext fw-semibold">{{ filled($info->carpetaIn) ? $info->carpetaIn : '—' }}</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted small">Carpeta Final</label>
+                        <p class="form-control-plaintext fw-semibold">{{ filled($info->carpetaFin) ? $info->carpetaFin : '—' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     @else
         <div class="card mb-4">
             <div class="card-body text-center text-muted py-4">

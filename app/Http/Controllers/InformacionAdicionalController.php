@@ -54,6 +54,9 @@ class InformacionAdicionalController extends Controller
             'trans_adicional'     => 'nullable|numeric',
             'fecha_inicial'       => 'nullable|date',
             'fecha_terminacion'   => 'nullable|date|after_or_equal:fecha_inicial',
+            'cajaUbica'           => 'nullable|numeric',
+            'carpetaIn'           => 'nullable|numeric',
+            'carpetaFin'          => 'nullable|numeric',
         ]);
 
         $this->contratoService->crearContratoConInformacion(
@@ -93,6 +96,8 @@ class InformacionAdicionalController extends Controller
             ->with('informacionAdicional')
             ->first();
 
+        $id_colaborador = $colaborador->id_colaborador;
+
         $informacion = $contrato->informacionAdicional;
 
         $validated = $request->validate([
@@ -118,6 +123,9 @@ class InformacionAdicionalController extends Controller
             'trans_adicional'     => 'nullable|numeric',
             'fecha_inicial'       => 'nullable|date',
             'fecha_terminacion'   => 'nullable|date|after_or_equal:fecha_inicial',
+            'cajaUbica'           => 'nullable|numeric',
+            'carpetaIn'           => 'nullable|numeric',
+            'carpetaFin'          => 'nullable|numeric',
         ]);
 
         $contrato->update([
@@ -128,7 +136,7 @@ class InformacionAdicionalController extends Controller
 
         $informacion->update($validated);
 
-        return redirect()->route('colaboradores.index')
+        return redirect()->route('colaboradores.detalle', $id_colaborador)
             ->with('success', 'Información adicional actualizada correctamente.');
     }
 
