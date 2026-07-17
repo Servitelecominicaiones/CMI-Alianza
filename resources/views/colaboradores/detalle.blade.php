@@ -193,6 +193,9 @@
                                 {{-- info adicional: --}}
                                 <th class="text-center">Cargo</th>
                                 <th class="text-center">Salario Básico</th>
+                                <th class="text-center">Ubicación de Caja</th>
+                                <th class="text-center">Carpeta Inicial</th>
+                                <th class="text-center">Carpeta Final</th>
                                 <th class="text-center">Documentos</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
@@ -211,6 +214,18 @@
                                 <td class="text-end text-nowrap">{{ $contratoActivo->informacionAdicional->salario_basico
                                         ? '$ ' . number_format($contratoActivo->informacionAdicional->salario_basico, 2, ',', '.')
                                         : '—' }}</td>
+                                <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->cajaUbica)
+                                        ? $contratoActivo->informacionAdicional->cajaUbica
+                                        : 'no detallada' }}
+                                </td>
+                                <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->carpetaIn)
+                                            ? $contratoActivo->informacionAdicional->carpetaIn
+                                            :'no detallada' }}
+                                </td>
+                                <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->carpetaFin)
+                                            ? $contratoActivo->informacionAdicional->carpetaFin
+                                            :'no detallada' }}
+                                </td>
 
                                 {{-- Boton Ver Documentos --}}
                                 <td class = "text-center">
@@ -285,6 +300,9 @@
                                 <th>Finalización de Contrato</th>
                                 <th>Cargo</th>
                                 <th>Salario Básico</th>
+                                <th>Ubicación de Caja</th>
+                                <th>Carpeta Inicial</th>
+                                <th>Carpeta Final</th>
                                 <th>Documentos</th>
                                 <th>Motivo Inactivación</th>
                                 <th class="text-center">Acciones</th>
@@ -304,6 +322,18 @@
                                     <td>{{ $inactivo->informacionAdicional->salario_basico
                                             ? '$ ' . number_format($inactivo->informacionAdicional->salario_basico, 2, ',', '.')
                                             : '—' }}</td>
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->cajaUbica)
+                                        ? $inactivo->informacionAdicional->cajaUbica
+                                        : 'no detallada' }}
+                                    </td>
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->carpetaIn)
+                                                ? $inactivo->informacionAdicional->carpetaIn
+                                                :'no detallada' }}
+                                    </td>
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->carpetaFin)
+                                                ? $inactivo->informacionAdicional->carpetaFin
+                                                :'no detallada' }}
+                                    </td>
 
                                     {{-- Boton Ver Documentos --}}
                                     <td class = "text-center">

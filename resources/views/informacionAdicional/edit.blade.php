@@ -18,7 +18,7 @@
                 &mdash; {{ $contrato->empresa->nombre_empresa }}
             </small>
         </div>
-        <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
+        <a href="{{ route('colaboradores.detalle', $colaborador->id_colaborador) }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
     </div>
@@ -37,7 +37,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Actualizar
             </button>
-            <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
+            <a href="{{ route('colaboradores.detalle', $colaborador->id_colaborador) }}" class="btn btn-secondary">
                 Cancelar
             </a>
         </div>

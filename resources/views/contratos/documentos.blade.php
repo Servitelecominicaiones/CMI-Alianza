@@ -28,7 +28,7 @@
             </small>
         </div>
 
-        <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
+        <a href="{{ route('colaboradores.detalle', $contrato->colaborador->id_colaborador) }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
     </div>

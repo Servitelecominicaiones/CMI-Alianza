@@ -31,7 +31,10 @@ class InformacionAdicionalColaborador extends Model
         'recargo_nocturno',
         'trans_adicional',
         'fecha_inicial',
-        'fecha_terminacion'
+        'fecha_terminacion',
+        'cajaUbica',
+        'carpetaIn',
+        'carpetaFin'
     ];
 
     public $timestamps = false;
