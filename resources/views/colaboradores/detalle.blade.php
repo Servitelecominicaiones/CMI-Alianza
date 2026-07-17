@@ -322,16 +322,16 @@
                                     <td>{{ $inactivo->informacionAdicional->salario_basico
                                             ? '$ ' . number_format($inactivo->informacionAdicional->salario_basico, 2, ',', '.')
                                             : '—' }}</td>
-                                    <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->cajaUbica)
-                                        ? $contratoActivo->informacionAdicional->cajaUbica
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->cajaUbica)
+                                        ? $inactivo->informacionAdicional->cajaUbica
                                         : 'no detallada' }}
                                     </td>
-                                    <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->carpetaIn)
-                                                ? $contratoActivo->informacionAdicional->carpetaIn
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->carpetaIn)
+                                                ? $inactivo->informacionAdicional->carpetaIn
                                                 :'no detallada' }}
                                     </td>
-                                    <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->carpetaFin)
-                                                ? $contratoActivo->informacionAdicional->carpetaFin
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->carpetaFin)
+                                                ? $inactivo->informacionAdicional->carpetaFin
                                                 :'no detallada' }}
                                     </td>
 
