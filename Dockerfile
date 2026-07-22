@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
+# Limites de subida de archivos (Laravel valida hasta 20MB en DocumentoController)
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 #Instalacion de composer php
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
