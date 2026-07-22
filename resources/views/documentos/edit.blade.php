@@ -146,10 +146,9 @@
             💾 Guardar cambios
         </button>
 
-        <a href="{{ route('documentos.index') }}"
-           class="btn btn-secondary">
+        <button type="button" onclick="cancelarEdicion()" class="btn btn-secondary">
             Cancelar
-        </a>
+        </button>
     </form>
 </div>
 @endsection
@@ -206,6 +205,16 @@ document.getElementById('tipo_propietario').addEventListener('change', function(
     }
 });
 
+
+function cancelarEdicion() {
+    if (window.history.length > 1) {
+        history.back();
+        return;
+    }
+
+    const from = @json($from);
+    window.location.href = from ? from : '{{ route('documentos.index') }}';
+}
 
 document.getElementById('formEditar').addEventListener('submit', function(e){
     e.preventDefault();
