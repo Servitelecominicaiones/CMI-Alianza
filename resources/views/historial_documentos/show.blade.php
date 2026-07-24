@@ -21,7 +21,7 @@
             <p><strong>Ruta Nueva:</strong></p>
             <pre>{{ $historialDocumento->ruta_nueva ?? '-' }}</pre>
 
-            <a href="{{ route('historial.index') }}"
+            <a href="{{ route('historial_documentos.index') }}"
             class="btn btn-secondary mt-3">
                 ⬅ Volver
             </a>

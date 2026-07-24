@@ -252,16 +252,20 @@ Route::middleware(['auth'])->group(function () {
     | Historial Documentos
     |--------------------------------------------------------------------------
     */
+    Route::get('historial-documentos/data', [HistorialDocumentoController::class, 'data'])
+    ->name('historial_documentos.data')
+    ->middleware('permission:historial.ver');
+
+    Route::get('historial-documentos/export', [HistorialDocumentoController::class, 'exportExcel'])
+        ->name('historial_documentos.export')
+        ->middleware('permission:historial.ver');
+    
     Route::get('historial-documentos', [HistorialDocumentoController::class, 'index'])
         ->name('historial_documentos.index')
         ->middleware('permission:historial.ver');
-
+    
     Route::get('historial-documentos/{historialDocumento}', [HistorialDocumentoController::class, 'show'])
         ->name('historial_documentos.show')
-        ->middleware('permission:historial.ver');
-
-    Route::get('/historial-documentos', [HistorialDocumentoController::class, 'index'])
-        ->name('historial.index')
         ->middleware('permission:historial.ver');
 
     /*

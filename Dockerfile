@@ -7,12 +7,13 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
     zip \
     unzip 
 
 #Dependencias de PHP necesarias para Laravel
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Limites de subida de archivos (Laravel valida hasta 20MB en DocumentoController)
 COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini

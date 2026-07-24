@@ -93,8 +93,8 @@
         {{-- Historico Documentos --}}
         @if(in_array('historial.ver', session('permisos_usuario', [])))
         <li class="nav-item">
-            <a href="{{ route('historial.index') }}"
-            class="nav-link {{ request()->routeIs('historial.*') ? 'active' : '' }}">
+            <a href="{{ route('historial_documentos.index') }}"
+            class="nav-link {{ request()->routeIs('historial_documentos.*') ? 'active' : '' }}">
                 <i class="bi bi-folder2-open"></i>
                 <span>Historial Documentos</span>
             </a>
