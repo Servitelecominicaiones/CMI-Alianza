@@ -193,11 +193,13 @@ class EmpresaController extends Controller
         $contratoActivo = $empresa->contratosEmpresa()
             ->where('estado', 1)
             ->with(['informacionAdicionalEmpresa'])
+            ->withCount('documentos')
             ->first();
 
         $contratosInactivos = $empresa->contratosEmpresa()
             ->where('estado', 0)
             ->with(['informacionAdicionalEmpresa'])
+            ->withCount('documentos')
             ->orderBy('updated_at', 'desc')
             ->get();
     

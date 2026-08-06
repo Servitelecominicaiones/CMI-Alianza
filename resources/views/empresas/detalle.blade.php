@@ -125,6 +125,7 @@
                                        title="Ver documentos del contrato"
                                        data-bs-toggle="tooltip">
                                         <i class="bi bi-file-earmark-text"></i>
+                                        <span class="badge bg-light text-dark ms-1">{{ $contratoActivo->documentos_count }}</span>
                                     </a>
                                 </td>
 
@@ -213,6 +214,7 @@
                                            title="Ver documentos del contrato"
                                            data-bs-toggle="tooltip">
                                             <i class="bi bi-file-earmark-text"></i>
+                                            <span class="badge bg-light text-dark ms-1">{{ $inactivo->documentos_count }}</span>
                                         </a>
                                     </td>
                                     <td class="text-center">

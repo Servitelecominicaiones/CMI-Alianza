@@ -152,13 +152,20 @@ class ContratoEmpresaController extends Controller
     public function documentos(ContratoEmpresa $contratoEmpresa)
     {
         $contratoEmpresa->load(['empresa', 'informacionAdicionalEmpresa']);
-    
-        $documentos = $contratoEmpresa->documentos()
+
+        $documentosActivos = $contratoEmpresa->documentos()
+            ->where('estado', 1)
             ->with(['categoria', 'area', 'usuario'])
-            ->orderByDesc('created_at')
+            ->orderBy('created_at')
             ->get();
-    
-        return view('contratosEmpresa.documentos', compact('contratoEmpresa', 'documentos'));
+
+        $documentosInactivos = $contratoEmpresa->documentos()
+            ->where('estado', 0)
+            ->with(['categoria', 'area', 'usuario'])
+            ->orderBy('created_at')
+            ->get();
+
+        return view('contratosEmpresa.documentos', compact('contratoEmpresa', 'documentosActivos', 'documentosInactivos'));
     }
     
 }
