@@ -74,6 +74,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('documentos', [DocumentoController::class,'index'])->name('documentos.index');
     Route::post('documentos', [DocumentoController::class,'store'])->name('documentos.store');
 
+    Route::get('documentos/papelera', [DocumentoController::class, 'papelera'])
+        ->name('documentos.papelera')
+        ->middleware('permission:documentos.eliminar');
+
     Route::get('/documentos/{id}/preview', [DocumentoController::class, 'preview'])
         ->name('documentos.preview')
         ->middleware('auth');
