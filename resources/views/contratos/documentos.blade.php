@@ -104,7 +104,7 @@
                                                 </a>
                                             @endif
 
-                                            @if (in_array('documentos.eliminar', session('permisos_usuario', []))&& $contrato->estado == 1)
+                                            @if (in_array('documentos.eliminar', session('permisos_usuario', [])))
                                                 {{-- Inactivar --}}
                                                 <form method="POST"
                                                     action="{{ route('documentos.destroy',$documento)}}"
