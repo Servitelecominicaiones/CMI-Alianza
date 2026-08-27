@@ -126,7 +126,7 @@ class DocumentoController extends Controller
         /* ================= PAGINACIÓN ================= */
 
         $documentos = $query
-            ->orderByDesc('updated_at')
+            ->orderBy('updated_at')
             ->paginate(20)
             ->withQueryString();
 

@@ -144,12 +144,12 @@
                                     </button>
                                 </form>
                             @else
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-secondary"
-                                        disabled
-                                        title="Disponible en {{ $doc->diasRestantesParaEliminar() }} día(s)">
-                                    <i class="bi bi-trash3-fill"></i>
-                                </button>
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
+                                      title="Disponible en {{ $doc->diasRestantesParaEliminar() }} día(s)">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled style="pointer-events: none;">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </span>
                             @endif
                         @endif
 
