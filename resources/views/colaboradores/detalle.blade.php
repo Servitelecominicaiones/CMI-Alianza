@@ -248,7 +248,7 @@
                                         </a>
                                     
                                         {{-- Editar info adicional --}}
-                                        <a href="{{ route('informacion_adicional.edit', $colaborador) }}"
+                                        <a href="{{ route('informacion_adicional.edit', $contratoActivo) }}"
                                         class="btn btn-sm btn-warning"
                                         title="Editar información Contrato"
                                         data-bs-toggle="tooltip">
@@ -357,6 +357,16 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
+
+                                        {{-- Editar info adicional --}}
+                                        <a href="{{ route('informacion_adicional.edit', $inactivo) }}"
+                                        class="btn btn-sm btn-warning"
+                                        title="Editar información Contrato"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        
+                                        {{-- Ver info adicional --}}
                                         <a href="{{ route('contrato.verInfo', $inactivo) }}"
                                         class="btn btn-sm btn-secondary"
                                         title="Ver información Contrato"

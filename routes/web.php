@@ -330,13 +330,13 @@ Route::middleware(['auth'])->group(function () {
         ->name('informacion_adicional.store')
         ->middleware('permission:colaboradores.crear');
 
-    // Ver formulario de editar → permiso editar
-    Route::get('/colaboradores/{colaborador}/informacion-adicional/editar', [InformacionAdicionalController::class, 'edit'])
+    // Ver formulario de editar → permiso editar (opera sobre un contrato puntual, activo o inactivo)
+    Route::get('/contratos/{contrato}/informacion-adicional/editar', [InformacionAdicionalController::class, 'edit'])
         ->name('informacion_adicional.edit')
         ->middleware('permission:colaboradores.editar');
 
     // Actualizar → permiso editar
-    Route::put('/colaboradores/{colaborador}/informacion-adicional', [InformacionAdicionalController::class, 'update'])
+    Route::put('/contratos/{contrato}/informacion-adicional', [InformacionAdicionalController::class, 'update'])
         ->name('informacion_adicional.update')
         ->middleware('permission:colaboradores.editar');
 

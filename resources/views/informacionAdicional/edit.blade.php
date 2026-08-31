@@ -24,7 +24,7 @@
     </div>
 
     <form id="formInfoAdicional"
-          action="{{ route('informacion_adicional.update', $colaborador) }}"
+          action="{{ route('informacion_adicional.update', $contrato) }}"
           method="POST">
         @csrf
         @method('PUT')
