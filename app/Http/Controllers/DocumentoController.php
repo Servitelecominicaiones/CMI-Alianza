@@ -91,6 +91,63 @@ class DocumentoController extends Controller
 
 
 
+    /* ================= PAPELERA ================= */
+
+    public function papelera(Request $request)
+    {
+        $query = Documento::with(['area', 'categoria', 'usuario', 'owner'])
+            ->where('estado', 0);
+
+        /* ================= FILTROS ================= */
+
+        if ($request->filled('area_id')) {
+            $query->where('area_id', $request->area_id);
+        }
+
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+
+        if ($request->filled('anio')) {
+            $query->where('anio', $request->anio);
+        }
+
+        if ($request->filled('tipo_propietario')) {
+            $query->where('owner_type', $request->tipo_propietario);
+        }
+
+        if ($request->filled('q')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre_original', 'like', '%' . $request->q . '%')
+                ->orWhere('descripcion', 'like', '%' . $request->q . '%');
+            });
+        }
+
+        /* ================= PAGINACIÓN ================= */
+
+        $documentos = $query
+            ->orderBy('updated_at')
+            ->paginate(20)
+            ->withQueryString();
+
+        /* ================= AÑOS DISPONIBLES ================= */
+
+        $anios = Documento::where('estado', 0)
+            ->select('anio')
+            ->distinct()
+            ->orderByDesc('anio')
+            ->pluck('anio');
+
+        /* ================= VISTA ================= */
+
+        return view('documentos.papelera', [
+            'documentos' => $documentos,
+            'areas' => Area::where('estado', 1)->orderBy('nombre')->get(),
+            'categorias' => Categoria::where('estado', 1)->orderBy('nombre')->get(),
+            'anios' => $anios,
+        ]);
+    }
+
     /* ================= PREVIEW SEGURO ================= */
 
     public function preview($id)

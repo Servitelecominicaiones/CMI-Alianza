@@ -74,6 +74,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('documentos', [DocumentoController::class,'index'])->name('documentos.index');
     Route::post('documentos', [DocumentoController::class,'store'])->name('documentos.store');
 
+    Route::get('documentos/papelera', [DocumentoController::class, 'papelera'])
+        ->name('documentos.papelera')
+        ->middleware('permission:documentos.eliminar');
+
     Route::get('/documentos/{id}/preview', [DocumentoController::class, 'preview'])
         ->name('documentos.preview')
         ->middleware('auth');
@@ -252,16 +256,20 @@ Route::middleware(['auth'])->group(function () {
     | Historial Documentos
     |--------------------------------------------------------------------------
     */
+    Route::get('historial-documentos/data', [HistorialDocumentoController::class, 'data'])
+    ->name('historial_documentos.data')
+    ->middleware('permission:historial.ver');
+
+    Route::get('historial-documentos/export', [HistorialDocumentoController::class, 'exportExcel'])
+        ->name('historial_documentos.export')
+        ->middleware('permission:historial.ver');
+
     Route::get('historial-documentos', [HistorialDocumentoController::class, 'index'])
         ->name('historial_documentos.index')
         ->middleware('permission:historial.ver');
 
     Route::get('historial-documentos/{historialDocumento}', [HistorialDocumentoController::class, 'show'])
         ->name('historial_documentos.show')
-        ->middleware('permission:historial.ver');
-
-    Route::get('/historial-documentos', [HistorialDocumentoController::class, 'index'])
-        ->name('historial.index')
         ->middleware('permission:historial.ver');
 
     /*
@@ -322,13 +330,13 @@ Route::middleware(['auth'])->group(function () {
         ->name('informacion_adicional.store')
         ->middleware('permission:colaboradores.crear');
 
-    // Ver formulario de editar → permiso editar
-    Route::get('/colaboradores/{colaborador}/informacion-adicional/editar', [InformacionAdicionalController::class, 'edit'])
+    // Ver formulario de editar → permiso editar (opera sobre un contrato puntual, activo o inactivo)
+    Route::get('/contratos/{contrato}/informacion-adicional/editar', [InformacionAdicionalController::class, 'edit'])
         ->name('informacion_adicional.edit')
         ->middleware('permission:colaboradores.editar');
 
     // Actualizar → permiso editar
-    Route::put('/colaboradores/{colaborador}/informacion-adicional', [InformacionAdicionalController::class, 'update'])
+    Route::put('/contratos/{contrato}/informacion-adicional', [InformacionAdicionalController::class, 'update'])
         ->name('informacion_adicional.update')
         ->middleware('permission:colaboradores.editar');
 

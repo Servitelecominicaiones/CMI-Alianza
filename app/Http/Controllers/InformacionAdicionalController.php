@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Colaborador;
+use App\Models\Contrato;
 use App\Models\InformacionAdicionalColaborador;
 use App\Models\Empresa;
 use App\Services\ContratoService;
@@ -68,13 +69,11 @@ class InformacionAdicionalController extends Controller
             ->with('success', 'Información adicional creada correctamente.');
     }
 
-    public function edit(Colaborador $colaborador)
+    public function edit(Contrato $contrato)
     {
-        $contrato = $colaborador->contratos()
-            ->where('estado',1)
-            ->with(['informacionAdicional','empresa'])
-            ->first();
+        $contrato->load(['informacionAdicional', 'empresa', 'colaborador']);
 
+        $colaborador = $contrato->colaborador;
         $informacion = $contrato->informacionAdicional;
         $empresas = Empresa::where('estado', 1)
             ->orWhere('id_empresa', $contrato->id_empresa)
@@ -88,14 +87,11 @@ class InformacionAdicionalController extends Controller
         return view('informacionAdicional.edit', compact('colaborador', 'informacion', 'empresas' , 'contrato'));
     }
 
-    public function update(Request $request, Colaborador $colaborador)
+    public function update(Request $request, Contrato $contrato)
     {
+        $contrato->load(['informacionAdicional', 'colaborador']);
 
-        $contrato = $colaborador->contratos()
-            ->where('estado', 1)
-            ->with('informacionAdicional')
-            ->first();
-
+        $colaborador = $contrato->colaborador;
         $id_colaborador = $colaborador->id_colaborador;
 
         $informacion = $contrato->informacionAdicional;
