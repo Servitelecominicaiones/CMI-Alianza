@@ -61,17 +61,22 @@ docker exec cmi_app php artisan migrate --force
 
 El stack `docker-compose.portainer.yml` está preparado para un servidor con **Traefik** como reverse proxy (ingreso por dominio y TLS). A diferencia de `docker-compose.yml` (que publica puertos directamente), este **no publica puertos**: evita conflictos cuando conviven varios stacks y delega el enrutamiento y el certificado en Traefik.
 
-**Variables del stack** (Portainer → Stack → *Environment*):
+**Variables del stack** — en Portainer se definen en **Stack → *Environment*** (no hace falta un `.env` en el repo; de hecho no existe porque está en `.gitignore`). La app toma su configuración de estas variables de entorno:
 
 | Variable | Ejemplo | Descripción |
 |---|---|---|
+| `APP_KEY` | `base64:...` | **Obligatoria.** Genérala con `php artisan key:generate --show` |
 | `APP_HOST` | `cmi-dev.servitel.co` | Dominio que publica Traefik |
+| `APP_URL` | `https://cmi-dev.servitel.co` | URL base (igual al dominio, con `https`) |
+| `APP_ENV` / `APP_DEBUG` / `APP_LOCALE` | `local` / `true` / `es` | (Opcionales) por defecto dev |
 | `TRAEFIK_NET` | `net_proxy` | Red externa de Traefik |
 | `TRAEFIK_ENTRYPOINT` | `websecure` | Entrypoint de Traefik |
 | `TRAEFIK_CERTRESOLVER` | `le` | (Opcional) resolver de certificados |
 | `DATA_ROOT` | `/data` | Raíz de datos persistentes en el host |
 | `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | | Credenciales MySQL |
 | `DB_ROOT_PASSWORD` | | (Opcional) root de MySQL |
+
+> **Despliegue por CLI** (en vez de Portainer): puedes poner estas variables en un archivo `.env` junto al compose y levantar con `docker compose --env-file .env -f docker-compose.portainer.yml up -d --build`.
 
 La red externa debe existir antes de desplegar (la crea Traefik):
 
