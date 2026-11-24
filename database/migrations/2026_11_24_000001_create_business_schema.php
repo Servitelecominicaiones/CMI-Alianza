@@ -7,210 +7,251 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Esquema de negocio de CMI Alianza.
  *
- * Reconstruido a partir de los modelos y controladores (rama Dev_Serv), ya que
- * el proyecto no tenía migraciones para estas tablas. Si el equipo dispone del
- * dump oficial de producción, ese es la fuente de verdad y reemplaza a esto.
+ * Basado en el DUMP OFICIAL de la base `cmi_alianza` (documento "Bases de datos",
+ * MariaDB). Se mantienen tipos (int(11)), llaves foráneas y el ENUM de owner_type
+ * tal cual el dump.
+ *
+ * Se AÑADEN 5 columnas que el código actual (rama Dev_Serv) escribe y que el dump
+ * —anterior a esos cambios— no incluía:
+ *   - usuarios.password_changed_at            (módulo de cambio de contraseña)
+ *   - historial_documentos.nombre_documento   (historial)
+ *   - informacion_adicional_colaborador.cajaUbica / carpetaIn / carpetaFin
  *
  * Las tablas de Laravel (users, sessions, cache, jobs, personal_access_tokens)
- * las crean las migraciones 0001_* y la de tokens; aquí solo van las de negocio.
+ * las crean las migraciones 0001_* y la de tokens.
  */
 return new class extends Migration
 {
     public function up(): void
     {
         DB::unprepared(<<<'SQL'
-CREATE TABLE roles (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL,
-  descripcion VARCHAR(255) NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `estado` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE permisos (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL UNIQUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `usuarios` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `rol_id` int(11) NOT NULL,
+  `estado` tinyint(4) DEFAULT 1,
+  `password_changed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  KEY `rol_id` (`rol_id`),
+  CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE permisos_rol (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  rol_id BIGINT UNSIGNED NOT NULL,
-  permiso VARCHAR(100) NOT NULL,
-  INDEX (rol_id),
-  FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `permisos_rol` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `rol_id` int(11) NOT NULL,
+  `permiso` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `rol_id` (`rol_id`),
+  CONSTRAINT `permisos_rol_ibfk_1` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE usuarios (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(150) NOT NULL,
-  email VARCHAR(150) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  rol_id BIGINT UNSIGNED NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  password_changed_at TIMESTAMP NULL,
-  remember_token VARCHAR(100) NULL,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-  FOREIGN KEY (rol_id) REFERENCES roles(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `identificacion` (
+  `id_identificacion` int(11) NOT NULL AUTO_INCREMENT,
+  `tipo_identificacion` varchar(50) NOT NULL,
+  `estado` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id_identificacion`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE areas (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `areas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `estado` tinyint(4) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE categorias (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `categorias` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `estado` tinyint(4) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE configuracion (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  clave VARCHAR(100) NOT NULL UNIQUE,
-  valor VARCHAR(255) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `configuracion` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `clave` varchar(100) NOT NULL,
+  `valor` text DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `clave` (`clave`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE identificacion (
-  id_identificacion BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  tipo_identificacion VARCHAR(100) NOT NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `empresa` (
+  `id_empresa` int(11) NOT NULL AUTO_INCREMENT,
+  `nit` varchar(50) NOT NULL,
+  `nombre_empresa` varchar(150) NOT NULL,
+  `actividad` varchar(150) DEFAULT NULL,
+  `direccion` varchar(200) DEFAULT NULL,
+  `barrio` varchar(100) DEFAULT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `estado` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `ciudad` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id_empresa`),
+  UNIQUE KEY `nit` (`nit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE empresa (
-  id_empresa BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nit VARCHAR(50) NOT NULL,
-  nombre_empresa VARCHAR(200) NOT NULL,
-  actividad VARCHAR(255) NULL,
-  ciudad VARCHAR(100) NULL,
-  direccion VARCHAR(255) NULL,
-  barrio VARCHAR(100) NULL,
-  telefono VARCHAR(50) NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `colaborador` (
+  `id_colaborador` int(11) NOT NULL AUTO_INCREMENT,
+  `id_tipo_identificacion` int(11) NOT NULL,
+  `numero_identificacion` varchar(50) NOT NULL,
+  `primer_nombre` varchar(100) NOT NULL,
+  `segundo_nombre` varchar(100) DEFAULT NULL,
+  `primer_apellido` varchar(100) NOT NULL,
+  `segundo_apellido` varchar(100) DEFAULT NULL,
+  `fecha_nacimiento` date DEFAULT NULL,
+  `genero` varchar(20) DEFAULT NULL,
+  `direccion` varchar(200) DEFAULT NULL,
+  `ciudad` varchar(100) DEFAULT NULL,
+  `barrio` varchar(100) DEFAULT NULL,
+  `estado_civil` varchar(50) DEFAULT NULL,
+  `telefono_residencial` varchar(20) DEFAULT NULL,
+  `telefono_celular` varchar(20) DEFAULT NULL,
+  `estudios` varchar(150) DEFAULT NULL,
+  `estado` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id_colaborador`),
+  KEY `fk_colaborador_identificacion` (`id_tipo_identificacion`),
+  CONSTRAINT `fk_colaborador_identificacion` FOREIGN KEY (`id_tipo_identificacion`) REFERENCES `identificacion` (`id_identificacion`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE colaborador (
-  id_colaborador BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  id_empresa BIGINT UNSIGNED NULL,
-  id_tipo_identificacion BIGINT UNSIGNED NULL,
-  numero_identificacion VARCHAR(50) NOT NULL,
-  primer_nombre VARCHAR(100) NOT NULL,
-  segundo_nombre VARCHAR(100) NULL,
-  primer_apellido VARCHAR(100) NOT NULL,
-  segundo_apellido VARCHAR(100) NULL,
-  fecha_nacimiento DATE NULL,
-  genero VARCHAR(30) NULL,
-  direccion VARCHAR(255) NULL,
-  ciudad VARCHAR(100) NULL,
-  barrio VARCHAR(100) NULL,
-  estado_civil VARCHAR(50) NULL,
-  telefono_residencial VARCHAR(50) NULL,
-  telefono_celular VARCHAR(50) NULL,
-  estudios VARCHAR(255) NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-  FOREIGN KEY (id_empresa) REFERENCES empresa(id_empresa),
-  FOREIGN KEY (id_tipo_identificacion) REFERENCES identificacion(id_identificacion)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `informacion_adicional_colaborador` (
+  `id_informacion_adicional` int(11) NOT NULL AUTO_INCREMENT,
+  `cargo` varchar(100) DEFAULT NULL,
+  `eps` varchar(100) DEFAULT NULL,
+  `fondo` varchar(100) DEFAULT NULL,
+  `caja_compensacion` varchar(100) DEFAULT NULL,
+  `salario_basico` decimal(12,2) DEFAULT NULL,
+  `sub_transporte` decimal(12,2) DEFAULT NULL,
+  `bono_servicio` decimal(12,2) DEFAULT NULL,
+  `factor_prestacional` decimal(12,2) DEFAULT NULL,
+  `bono_salud_y_vivienda` decimal(12,2) DEFAULT NULL,
+  `medios_transporte` decimal(12,2) DEFAULT NULL,
+  `prima_riesgo` decimal(12,2) DEFAULT NULL,
+  `auxilio_formacion` decimal(12,2) DEFAULT NULL,
+  `comision_fija` decimal(12,2) DEFAULT NULL,
+  `productividad_fija` decimal(12,2) DEFAULT NULL,
+  `tiempo_extra_fijo` decimal(12,2) DEFAULT NULL,
+  `bono_mercado` decimal(12,2) DEFAULT NULL,
+  `auxilio_equipo` decimal(12,2) DEFAULT NULL,
+  `recargo_nocturno` decimal(12,2) DEFAULT NULL,
+  `trans_adicional` decimal(12,2) DEFAULT NULL,
+  `fecha_inicial` date DEFAULT NULL,
+  `fecha_terminacion` date DEFAULT NULL,
+  `cajaUbica` varchar(100) DEFAULT NULL,
+  `carpetaIn` varchar(100) DEFAULT NULL,
+  `carpetaFin` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id_informacion_adicional`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE informacion_adicional_colaborador (
-  id_informacion_adicional BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  id_colaborador BIGINT UNSIGNED NULL,
-  cargo VARCHAR(150) NULL,
-  eps VARCHAR(150) NULL,
-  fondo VARCHAR(150) NULL,
-  caja_compensacion VARCHAR(150) NULL,
-  salario_basico DECIMAL(15,2) NULL,
-  sub_transporte DECIMAL(15,2) NULL,
-  bono_servicio DECIMAL(15,2) NULL,
-  factor_prestacional DECIMAL(15,2) NULL,
-  bono_salud_y_vivienda DECIMAL(15,2) NULL,
-  medios_transporte DECIMAL(15,2) NULL,
-  prima_riesgo DECIMAL(15,2) NULL,
-  auxilio_formacion DECIMAL(15,2) NULL,
-  comision_fija DECIMAL(15,2) NULL,
-  productividad_fija DECIMAL(15,2) NULL,
-  tiempo_extra_fijo DECIMAL(15,2) NULL,
-  bono_mercado DECIMAL(15,2) NULL,
-  auxilio_equipo DECIMAL(15,2) NULL,
-  recargo_nocturno DECIMAL(15,2) NULL,
-  trans_adicional DECIMAL(15,2) NULL,
-  fecha_inicial DATE NULL,
-  fecha_terminacion DATE NULL,
-  cajaUbica VARCHAR(100) NULL,
-  carpetaIn VARCHAR(100) NULL,
-  carpetaFin VARCHAR(100) NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `informacion_adicional_empresa` (
+  `id_informacion_adicional_empresa` int(11) NOT NULL AUTO_INCREMENT,
+  `inicio_contrato` date DEFAULT NULL,
+  `finalizacion_contrato` date DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id_informacion_adicional_empresa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE contratos (
-  id_contrato BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  id_empresa BIGINT UNSIGNED NULL,
-  id_colaborador BIGINT UNSIGNED NOT NULL,
-  id_informacion_adicional BIGINT UNSIGNED NULL,
-  inicio_contrato DATE NULL,
-  finalizacion_contrato DATE NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  motivo_inactivacion VARCHAR(500) NULL,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-  FOREIGN KEY (id_empresa) REFERENCES empresa(id_empresa),
-  FOREIGN KEY (id_colaborador) REFERENCES colaborador(id_colaborador),
-  FOREIGN KEY (id_informacion_adicional) REFERENCES informacion_adicional_colaborador(id_informacion_adicional)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `contratos` (
+  `id_contrato` int(11) NOT NULL AUTO_INCREMENT,
+  `id_empresa` int(11) NOT NULL,
+  `id_colaborador` int(11) NOT NULL,
+  `id_informacion_adicional` int(11) NOT NULL,
+  `inicio_contrato` date DEFAULT NULL,
+  `finalizacion_contrato` date DEFAULT NULL,
+  `estado` tinyint(4) DEFAULT NULL,
+  `motivo_inactivacion` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id_contrato`),
+  KEY `fk_contrato_empresa` (`id_empresa`),
+  KEY `fk_contrato_colaborador` (`id_colaborador`),
+  KEY `fk_contrato_info` (`id_informacion_adicional`),
+  CONSTRAINT `fk_contrato_colaborador` FOREIGN KEY (`id_colaborador`) REFERENCES `colaborador` (`id_colaborador`),
+  CONSTRAINT `fk_contrato_empresa` FOREIGN KEY (`id_empresa`) REFERENCES `empresa` (`id_empresa`),
+  CONSTRAINT `fk_contrato_info` FOREIGN KEY (`id_informacion_adicional`) REFERENCES `informacion_adicional_colaborador` (`id_informacion_adicional`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE informacion_adicional_empresa (
-  id_informacion_adicional_empresa BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  inicio_contrato DATE NULL,
-  finalizacion_contrato DATE NULL,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `contrato_empresa` (
+  `id_contrato_empresa` int(11) NOT NULL AUTO_INCREMENT,
+  `id_empresa` int(11) NOT NULL,
+  `id_informacion_adicional_empresa` int(11) NOT NULL,
+  `estado` tinyint(4) DEFAULT NULL,
+  `motivo_inactivacion` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id_contrato_empresa`),
+  KEY `fk_contratoEmpresa_empresa` (`id_empresa`),
+  KEY `fk_contratoEmpresa_infoAdicionalEmpresa` (`id_informacion_adicional_empresa`),
+  CONSTRAINT `fk_contratoEmpresa_empresa` FOREIGN KEY (`id_empresa`) REFERENCES `empresa` (`id_empresa`),
+  CONSTRAINT `fk_contratoEmpresa_infoAdicionalEmpresa` FOREIGN KEY (`id_informacion_adicional_empresa`) REFERENCES `informacion_adicional_empresa` (`id_informacion_adicional_empresa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE contrato_empresa (
-  id_contrato_empresa BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  id_empresa BIGINT UNSIGNED NOT NULL,
-  id_informacion_adicional_empresa BIGINT UNSIGNED NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  motivo_inactivacion VARCHAR(500) NULL,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-  FOREIGN KEY (id_empresa) REFERENCES empresa(id_empresa),
-  FOREIGN KEY (id_informacion_adicional_empresa) REFERENCES informacion_adicional_empresa(id_informacion_adicional_empresa)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `documentos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre_original` varchar(255) NOT NULL,
+  `nombre_archivo` varchar(255) NOT NULL,
+  `ruta_completa` varchar(500) NOT NULL,
+  `area_id` int(11) NOT NULL,
+  `categoria_id` int(11) NOT NULL,
+  `anio` int(11) NOT NULL,
+  `extension` varchar(10) DEFAULT NULL,
+  `tamanio` int(11) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `usuario_carga_id` int(11) NOT NULL,
+  `estado` tinyint(4) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `owner_type` enum('empresa','colaborador','contrato','contratoEmpresa') DEFAULT NULL,
+  `owner_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `area_id` (`area_id`),
+  KEY `categoria_id` (`categoria_id`),
+  KEY `usuario_carga_id` (`usuario_carga_id`),
+  CONSTRAINT `documentos_ibfk_1` FOREIGN KEY (`area_id`) REFERENCES `areas` (`id`),
+  CONSTRAINT `documentos_ibfk_2` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`),
+  CONSTRAINT `documentos_ibfk_3` FOREIGN KEY (`usuario_carga_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE documentos (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nombre_original VARCHAR(255) NOT NULL,
-  nombre_archivo VARCHAR(255) NOT NULL,
-  ruta_completa VARCHAR(500) NOT NULL,
-  area_id BIGINT UNSIGNED NULL,
-  categoria_id BIGINT UNSIGNED NULL,
-  anio SMALLINT NULL,
-  extension VARCHAR(20) NULL,
-  tamanio BIGINT NULL,
-  descripcion TEXT NULL,
-  usuario_carga_id BIGINT UNSIGNED NULL,
-  estado TINYINT NOT NULL DEFAULT 1,
-  owner_id BIGINT UNSIGNED NULL,
-  owner_type VARCHAR(50) NULL,
-  created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL,
-  INDEX (owner_type, owner_id),
-  FOREIGN KEY (area_id) REFERENCES areas(id),
-  FOREIGN KEY (categoria_id) REFERENCES categorias(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE historial_documentos (
-  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  documento_id BIGINT UNSIGNED NULL,
-  nombre_documento VARCHAR(255) NULL,
-  usuario_id BIGINT UNSIGNED NULL,
-  accion VARCHAR(50) NOT NULL,
-  ruta_anterior VARCHAR(500) NULL,
-  ruta_nueva VARCHAR(500) NULL,
-  created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX (documento_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `historial_documentos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `documento_id` int(11) NOT NULL,
+  `nombre_documento` varchar(255) DEFAULT NULL,
+  `ruta_anterior` varchar(500) DEFAULT NULL,
+  `ruta_nueva` varchar(500) DEFAULT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `accion` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `documento_id` (`documento_id`),
+  KEY `usuario_id` (`usuario_id`),
+  CONSTRAINT `historial_documentos_ibfk_1` FOREIGN KEY (`documento_id`) REFERENCES `documentos` (`id`),
+  CONSTRAINT `historial_documentos_ibfk_2` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 SQL);
     }
 
@@ -218,11 +259,10 @@ SQL);
     {
         Schema::disableForeignKeyConstraints();
         foreach ([
-            'historial_documentos', 'documentos', 'contrato_empresa',
-            'informacion_adicional_empresa', 'contratos',
-            'informacion_adicional_colaborador', 'colaborador', 'empresa',
-            'identificacion', 'configuracion', 'categorias', 'areas',
-            'usuarios', 'permisos_rol', 'permisos', 'roles',
+            'historial_documentos', 'documentos', 'contrato_empresa', 'contratos',
+            'informacion_adicional_empresa', 'informacion_adicional_colaborador',
+            'colaborador', 'empresa', 'configuracion', 'categorias', 'areas',
+            'identificacion', 'permisos_rol', 'usuarios', 'roles',
         ] as $tabla) {
             Schema::dropIfExists($tabla);
         }

@@ -21,7 +21,8 @@ class BusinessSeeder extends Seeder
             ['id' => 3, 'nombre' => 'Viewer Documental',  'descripcion' => 'Solo consulta',         'estado' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // ---- Permisos (catálogo) ----
+        // ---- Catálogo de permisos (lista fija del sistema; no hay tabla `permisos`,
+        //      el código la maneja como arreglo en RolController) ----
         $permisos = [
             'usuarios.ver', 'usuarios.crear', 'usuarios.editar', 'usuarios.eliminar',
             'roles.ver', 'roles.crear', 'roles.editar', 'roles.eliminar',
@@ -33,11 +34,8 @@ class BusinessSeeder extends Seeder
             'colaboradores.ver', 'colaboradores.crear', 'colaboradores.editar', 'colaboradores.eliminar',
             'empresas.ver', 'empresas.crear', 'empresas.editar', 'empresas.eliminar',
         ];
-        DB::table('permisos')->insertOrIgnore(
-            array_map(fn ($p) => ['nombre' => $p], $permisos)
-        );
 
-        // ---- Permisos por rol ----
+        // ---- Permisos por rol (tabla permisos_rol) ----
         $asignar = function (int $rolId, array $lista) {
             foreach ($lista as $permiso) {
                 DB::table('permisos_rol')->updateOrInsert(
