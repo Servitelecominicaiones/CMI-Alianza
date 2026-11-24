@@ -15,16 +15,16 @@
                 {{ $colaborador->primer_apellido }}
                 {{ $colaborador->segundo_apellido }}
                 &mdash; {{ $colaborador->numero_identificacion }}
-                &mdash; {{ $colaborador->empresa->nombre_empresa }}
+                &mdash; {{ $contrato->empresa->nombre_empresa }}
             </small>
         </div>
-        <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
+        <a href="{{ route('colaboradores.detalle', $colaborador->id_colaborador) }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
     </div>
 
     <form id="formInfoAdicional"
-          action="{{ route('informacion_adicional.update', $colaborador) }}"
+          action="{{ route('informacion_adicional.update', $contrato) }}"
           method="POST">
         @csrf
         @method('PUT')
@@ -37,7 +37,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Actualizar
             </button>
-            <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
+            <a href="{{ route('colaboradores.detalle', $colaborador->id_colaborador) }}" class="btn btn-secondary">
                 Cancelar
             </a>
         </div>
@@ -77,11 +77,26 @@
 
 <script>
 document.getElementById('formInfoAdicional').addEventListener('submit', function (e) {
-    if (!confirm('¿Está seguro de actualizar la información adicional?')) {
-        e.preventDefault();
-        return;
-    }
-    document.getElementById('loader-overlay').style.display = 'flex';
+    e.preventDefault();
+
+    Swal.fire({
+        title: '¿Confirmar actualización?',
+        text: '¿Seguro que deseas actualizar la información del Contrato?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, actualizar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d'
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            // Mostrar loader
+            document.getElementById('loader-overlay').style.display = 'flex';
+
+            this.submit();
+        }
+    });
 });
 </script>
 

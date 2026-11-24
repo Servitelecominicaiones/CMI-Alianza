@@ -25,16 +25,24 @@
                 @enderror
             </div>
 
-            {{-- Medios de Transporte --}}
+            {{-- Empresa --}}
             <div class="col-md-6 mb-3">
-                <label class="form-label">Medios de Transporte</label>
-                <input type="number"
-                       name="medios_transporte"
-                       class="form-control @error('medios_transporte') is-invalid @enderror"
-                       value="{{ old('medios_transporte', $informacion->medios_transporte ?? '') }}">
-                @error('medios_transporte')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <label class="form-label">Empresa</label>
+            <select name="id_empresa"
+                    id="select-empresa"
+                    class="form-select select2-empresa @error('id_empresa') is-invalid @enderror"
+                    required>
+                <option value="">Seleccione una empresa</option>
+                @foreach($empresas as $empresa)
+                    <option value="{{ $empresa->id_empresa }}"
+                        {{ old('id_empresa', $contrato->id_empresa ?? null) == $empresa->id_empresa ? 'selected' : ''  }}>
+                        {{ $empresa->nombre_empresa }}
+                    </option>
+                @endforeach
+            </select>
+            @error('id_empresa')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
             </div>
 
             {{-- Fecha Inicial --}}
@@ -151,15 +159,30 @@
                 </div>
             </div>
 
+            {{-- Medios de Transporte --}}
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Medios de Transporte</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number"
+                        name="medios_transporte"
+                        class="form-control @error('medios_transporte') is-invalid @enderror"
+                        value="{{ old('medios_transporte', $informacion->medios_transporte ?? '') }}">
+                    @error('medios_transporte')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
             {{-- Factor Prestacional --}}
             <div class="col-md-4 mb-3">
                 <label class="form-label">Factor Prestacional</label>
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="factor_prestacional"
-                           class="form-control @error('factor_prestacional') is-invalid @enderror"
-                           value="{{ old('factor_prestacional', $informacion->factor_prestacional ?? '') }}">
+                        name="factor_prestacional"
+                        class="form-control @error('factor_prestacional') is-invalid @enderror"
+                        value="{{ old('factor_prestacional', $informacion->factor_prestacional ?? '') }}">
                     @error('factor_prestacional')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -172,9 +195,9 @@
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="bono_servicio"
-                           class="form-control @error('bono_servicio') is-invalid @enderror"
-                           value="{{ old('bono_servicio', $informacion->bono_servicio ?? '') }}">
+                        name="bono_servicio"
+                        class="form-control @error('bono_servicio') is-invalid @enderror"
+                        value="{{ old('bono_servicio', $informacion->bono_servicio ?? '') }}">
                     @error('bono_servicio')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -187,9 +210,9 @@
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="bono_salud_y_vivienda"
-                           class="form-control @error('bono_salud_y_vivienda') is-invalid @enderror"
-                           value="{{ old('bono_salud_y_vivienda', $informacion->bono_salud_y_vivienda ?? '') }}">
+                        name="bono_salud_y_vivienda"
+                        class="form-control @error('bono_salud_y_vivienda') is-invalid @enderror"
+                        value="{{ old('bono_salud_y_vivienda', $informacion->bono_salud_y_vivienda ?? '') }}">
                     @error('bono_salud_y_vivienda')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -202,9 +225,9 @@
                 <div class="input-group">
                     <span class="input-group-text">$</span>
                     <input type="number" step="0.01"
-                           name="prima_riesgo"
-                           class="form-control @error('prima_riesgo') is-invalid @enderror"
-                           value="{{ old('prima_riesgo', $informacion->prima_riesgo ?? '') }}">
+                        name="prima_riesgo"
+                        class="form-control @error('prima_riesgo') is-invalid @enderror"
+                        value="{{ old('prima_riesgo', $informacion->prima_riesgo ?? '') }}">
                     @error('prima_riesgo')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -346,3 +369,65 @@
         </div>
     </div>
 </div>
+
+{{-- Ubicación Física del Expediente --}}
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <i class="bi bi-archive me-2"></i> Ubicación Física del Expediente
+    </div>
+    <div class="card-body">
+        <div class="row">
+
+            {{-- Ubicación de Caja --}}
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Ubicación de Caja</label>
+                <input type="number"
+                       name="cajaUbica"
+                       class="form-control @error('cajaUbica') is-invalid @enderror"
+                       value="{{ old('cajaUbica', $informacion->cajaUbica ?? '') }}">
+                @error('cajaUbica')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- Carpeta Inicial --}}
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Carpeta Inicial</label>
+                <input type="number"
+                       name="carpetaIn"
+                       class="form-control @error('carpetaIn') is-invalid @enderror"
+                       value="{{ old('carpetaIn', $informacion->carpetaIn ?? '') }}">
+                @error('carpetaIn')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- Carpeta Final --}}
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Carpeta Final</label>
+                <input type="number"
+                       name="carpetaFin"
+                       class="form-control @error('carpetaFin') is-invalid @enderror"
+                       value="{{ old('carpetaFin', $informacion->carpetaFin ?? '') }}">
+                @error('carpetaFin')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    $(document).ready(function () {
+        $('#select-empresa').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione una empresa',
+            width: '100%',
+            language: 'es',
+            dropdownParent: $('#select-empresa').parent() // evita problemas de z-index si algún día está en un modal
+        });
+    });
+</script>
+@endpush

@@ -4,24 +4,36 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Colaborador;
+use App\Models\Contrato;
 use App\Models\InformacionAdicionalColaborador;
+use App\Models\Empresa;
+use App\Services\ContratoService;
 
 class InformacionAdicionalController extends Controller
 {
     
+    protected $contratoService;
+
+    public function __construct(ContratoService $contratoService)
+    {   
+        $this->contratoService = $contratoService;
+    }
+
     public function create(Colaborador $colaborador)
     {
-        // Si ya tiene info adicional, redirige al edit para evitar duplicados
-        if ($colaborador->informacionAdicional) {
-            return redirect()->route('informacion_adicional.edit', $colaborador);
-        }
+        $empresas = Empresa::where('estado' , 1)->get();
 
-        return view('informacionAdicional.create', compact('colaborador'));
-    }
+        // Si ya tiene info adicional, redirige al edit para evitar duplicados
+        if ($colaborador->contratoActivo()) {
+            return redirect()->route('colaboradores.detalle', $colaborador)->with('error','No se puede iniciar otro contraro mientras el colaborador tenga uno activo');        }
+
+        return view('informacionAdicional.create', compact('colaborador', 'empresas'));
+        }
 
     public function store(Request $request, Colaborador $colaborador)
     {
         $validated = $request->validate([
+            'id_empresa'          => 'required|exists:empresa,id_empresa',
             'cargo'               => 'nullable|string|max:100',
             'eps'                 => 'nullable|string|max:100',
             'fondo'               => 'nullable|string|max:100',
@@ -43,33 +55,49 @@ class InformacionAdicionalController extends Controller
             'trans_adicional'     => 'nullable|numeric',
             'fecha_inicial'       => 'nullable|date',
             'fecha_terminacion'   => 'nullable|date|after_or_equal:fecha_inicial',
+            'cajaUbica'           => 'nullable|numeric',
+            'carpetaIn'           => 'nullable|numeric',
+            'carpetaFin'          => 'nullable|numeric',
         ]);
 
-        $validated['id_colaborador'] = $colaborador->id_colaborador;
-
-        InformacionAdicionalColaborador::create($validated);
+        $this->contratoService->crearContratoConInformacion(
+            $colaborador,
+            $validated
+        );
 
         return redirect()->route('colaboradores.index')
             ->with('success', 'Información adicional creada correctamente.');
     }
 
-    public function edit(Colaborador $colaborador)
+    public function edit(Contrato $contrato)
     {
-        $informacion = $colaborador->informacionAdicional;
+        $contrato->load(['informacionAdicional', 'empresa', 'colaborador']);
+
+        $colaborador = $contrato->colaborador;
+        $informacion = $contrato->informacionAdicional;
+        $empresas = Empresa::where('estado', 1)
+            ->orWhere('id_empresa', $contrato->id_empresa)
+            ->get();
 
         // Si no tiene info adicional, redirige al create
         if (!$informacion) {
             return redirect()->route('informacion_adicional.create', $colaborador);
         }
 
-        return view('informacionAdicional.edit', compact('colaborador', 'informacion'));
+        return view('informacionAdicional.edit', compact('colaborador', 'informacion', 'empresas' , 'contrato'));
     }
 
-    public function update(Request $request, Colaborador $colaborador)
+    public function update(Request $request, Contrato $contrato)
     {
-        $informacion = $colaborador->informacionAdicional;
+        $contrato->load(['informacionAdicional', 'colaborador']);
+
+        $colaborador = $contrato->colaborador;
+        $id_colaborador = $colaborador->id_colaborador;
+
+        $informacion = $contrato->informacionAdicional;
 
         $validated = $request->validate([
+            'id_empresa'           => 'required|exists:empresa,id_empresa',
             'cargo'               => 'nullable|string|max:100',
             'eps'                 => 'nullable|string|max:100',
             'fondo'               => 'nullable|string|max:100',
@@ -91,11 +119,20 @@ class InformacionAdicionalController extends Controller
             'trans_adicional'     => 'nullable|numeric',
             'fecha_inicial'       => 'nullable|date',
             'fecha_terminacion'   => 'nullable|date|after_or_equal:fecha_inicial',
+            'cajaUbica'           => 'nullable|numeric',
+            'carpetaIn'           => 'nullable|numeric',
+            'carpetaFin'          => 'nullable|numeric',
+        ]);
+
+        $contrato->update([
+            'id_empresa' => $validated['id_empresa'],
+            'inicio_contrato' => $validated['fecha_inicial'],
+            'finalizacion_contrato' => $validated['fecha_terminacion']
         ]);
 
         $informacion->update($validated);
 
-        return redirect()->route('colaboradores.index')
+        return redirect()->route('colaboradores.detalle', $id_colaborador)
             ->with('success', 'Información adicional actualizada correctamente.');
     }
 

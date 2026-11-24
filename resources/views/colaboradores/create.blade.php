@@ -9,24 +9,6 @@
     <form id="formCrearColaborador" action="{{ route('colaboradores.store') }}" method="POST">
         @csrf
 
-        {{-- Empresa --}}
-        <div class="mb-3">
-            <label class="form-label">Empresa</label>
-            <select name="id_empresa"
-                    class="form-select @error('id_empresa') is-invalid @enderror"
-                    required>
-                <option value="">Seleccione una empresa</option>
-                @foreach($empresas as $empresa)
-                    <option value="{{ $empresa->id_empresa }}"
-                        {{ old('id_empresa') == $empresa->id_empresa ? 'selected' : '' }}>
-                        {{ $empresa->nombre_empresa }}
-                    </option>
-                @endforeach
-            </select>
-            @error('id_empresa')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
 
         {{-- Tipo Identificación --}}
         <div class="mb-3">
@@ -175,15 +157,6 @@
             </select>
         </div>
 
-        {{-- Estado --}}
-        <div class="mb-3">
-            <label class="form-label">Estado</label>
-            <select name="estado" class="form-select" required>
-                <option value="1" {{ old('estado') == 1 ? 'selected' : '' }}>Activo</option>
-                <option value="0" {{ old('estado') == 0 ? 'selected' : '' }}>Inactivo</option>
-            </select>
-        </div>
-
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Guardar
@@ -227,15 +200,28 @@
 </style>
 
 <script>
-document.getElementById('formCrearColaborador').addEventListener('submit', function (e) {
+document.getElementById('formCrearColaborador').addEventListener('submit', function(e){
+            e.preventDefault()
 
-    if (!confirm('¿Está seguro de crear este colaborador?')) {
-        e.preventDefault();
-        return;
-    }
+            Swal.fire({
+                title: '¿Estas seguro(a) de Crear este colaborador?',
+                text: 'Se incluira la informcion de este colaborador dentro del sistema',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, Crear',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-    document.getElementById('loader-overlay').style.display = 'flex';
-});
+                    // Mostrar loader
+                    document.getElementById('loader-overlay').style.display = 'flex';
+
+                    this.submit();
+                }
+            });
+        });
 </script>
 
 @endsection

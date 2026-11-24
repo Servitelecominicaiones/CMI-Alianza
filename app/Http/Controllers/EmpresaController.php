@@ -8,10 +8,20 @@ use App\Models\Empresa;
 
 class EmpresaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $empresas = Empresa::withCount('colaboradores')->get();
-        
+        $empresas = Empresa::orderBy('estado', 'desc')->get();
+
+        /** RESPUESTA API **/
+
+        if ($request->expectsJson()){
+            return response()->json([
+                'success'=> true,
+                'data'=> $empresas
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return view('empresas.index',compact('empresas'));
     }
 
@@ -35,12 +45,10 @@ class EmpresaController extends Controller
 
             'barrio' => 'nullable|string|max:150',
 
-            'telefono' => 'nullable|numeric',
-
-            'estado' => 'required|boolean'
+            'telefono' => 'nullable|numeric'
         ]);
 
-        Empresa::create([
+        $empresa = Empresa::create([
             'nit' => $request -> nit,
             'nombre_empresa' => $request -> nombre_empresa,
             'actividad' => $request -> actividad,
@@ -48,9 +56,21 @@ class EmpresaController extends Controller
             'direccion' => $request -> direccion,
             'barrio' => $request -> barrio,
             'telefono' => $request -> telefono,
-            'estado' => $request -> estado
+            'estado' => 0
         ]);
 
+        /** RESPUESTA API **/
+
+        if ($request -> expectsJson()){
+            return response() ->json([
+                'success' => true,
+                'message' => 'Se creo la Empresa exitosamente',
+                'data' => $empresa 
+            ]);
+        }
+
+
+        /** RESPUESTA WEB **/
         return redirect()
             ->route('empresas.index')
             ->with('success', 'Empresa creada exitosamente.');
@@ -76,9 +96,7 @@ class EmpresaController extends Controller
 
             'barrio' => 'nullable|string|max:150',
 
-            'telefono' => 'nullable|numeric',
-
-            'estado' => 'required|boolean'
+            'telefono' => 'nullable|numeric'
         ]);
 
         $empresa->update($request->only([
@@ -88,19 +106,35 @@ class EmpresaController extends Controller
             'ciudad',
             'direccion',
             'barrio',
-            'telefono',
-            'estado'
+            'telefono'
         ]));
 
+        /* RESPUESTA API */
+        if ($request->expectsJson()){
+            return response()->json([
+                'success'=> true,
+                'message'=> 'Edito la empresa de manera exitosa',
+                'data' => $empresa
+            ]);
+        }
+
+        /* RESPUESTA WEB */
         return redirect()
             ->route('empresas.index')
             ->with('success', 'Empresa actualizada exitosamente.');
     }
 
-    public function inactivar(Empresa $empresa)
-    {
+    public function inactivar(Empresa $empresa, Request $request)
+    {    
         if ($empresa->estado == 0)
-        {
+        {   
+            /* RESPUESTA API error */
+            if($request->expectsJson()){
+                return response()->json([
+                    'success'=>false,
+                    'message'=>'La empresa ya esta inactiva'
+                ]);
+            }
             return redirect()
                 ->route('empresas.index')
                 ->with('success','la empresa ya esta inactiva');
@@ -110,6 +144,18 @@ class EmpresaController extends Controller
             'estado' => 0
         ]);
 
+        /* RESPUESTA API */
+        if ($request -> expectsJson()){
+            return response()->json([
+                'success'=>'Se Inactivo la empresa exitosamente',
+                'data'=>[
+                    'empresa'=> $empresa->nombre_empresa,
+                    'estado' => $empresa->estado
+                ]
+            ]);
+        }
+
+        /* RESPUESTA WEB */
         return redirect()
             ->route('empresas.index')
             ->with('success','Empresa inactivada Exitosamente');
@@ -144,7 +190,19 @@ class EmpresaController extends Controller
 
     public function detalle(Empresa $empresa)
     {
-        $empresa->load('colaboradores');
-        return view('empresas.detalle', compact('empresa'));
+        $contratoActivo = $empresa->contratosEmpresa()
+            ->where('estado', 1)
+            ->with(['informacionAdicionalEmpresa'])
+            ->withCount('documentos')
+            ->first();
+
+        $contratosInactivos = $empresa->contratosEmpresa()
+            ->where('estado', 0)
+            ->with(['informacionAdicionalEmpresa'])
+            ->withCount('documentos')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+    
+        return view('empresas.detalle', compact('empresa', 'contratoActivo', 'contratosInactivos'));
     }
 }

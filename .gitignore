@@ -10,6 +10,7 @@ app/storage/
 # Laravel 5 & Lumen specific
 public/storage
 public/hot
+public/bodega_documental
 
 # Laravel 5 & Lumen specific with changed public path
 public_html/storage
@@ -28,3 +29,9 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# Dumps Db
+*.sql
+
+#Contexto proyecto
+*.md

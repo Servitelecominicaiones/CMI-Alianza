@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+if [ ! -f /var/www/vendor/autoload.php ]; then
+    composer install --optimize-autoloader --no-dev
+fi
+
+chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+exec php-fpm

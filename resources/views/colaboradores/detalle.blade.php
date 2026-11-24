@@ -5,6 +5,15 @@
 @section('content')
 <div class="container">
 
+    @php
+        $nombreCompleto = trim(
+            ($colaborador->primer_nombre ?? '') . ' ' .
+            ($colaborador->segundo_nombre ?? '') . ' ' .
+            ($colaborador->primer_apellido ?? '') . ' ' .
+            ($colaborador->segundo_apellido ?? '')
+        );
+    @endphp
+
     {{-- Encabezado --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -15,7 +24,7 @@
                 {{ $colaborador->primer_apellido }}
                 {{ $colaborador->segundo_apellido }}
                 &mdash; {{ $colaborador->numero_identificacion }}
-                &mdash; {{ $colaborador->empresa->nombre_empresa ?? 'Sin empresa' }}
+                &mdash; {{ $contratoActivo->empresa->nombre_empresa ?? 'Sin empresa' }}
             </small>
         </div>
         <a href="{{ route('colaboradores.index') }}" class="btn btn-secondary">
@@ -38,7 +47,7 @@
                 <div class="col-md-4 mb-3">
                     <label class="form-label text-muted small">Empresa</label>
                     <p class="form-control-plaintext fw-semibold">
-                        {{ $colaborador->empresa->nombre_empresa ?? '—' }}
+                        {{ $contratoActivo->empresa->nombre_empresa ?? '—' }}
                     </p>
                 </div>
 
@@ -156,163 +165,341 @@
             </div>
         </div>
     </div>
+    
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ route('informacion_adicional.create', $colaborador) }}" class="btn btn-primary">
+            <i class="bi bi-file-earmark-plus"></i> Nuevo Contrato
+        </a>
+    </div>
+
 
     {{-- ══════════════════════════════════════════
-         BLOQUE 2: Información Adicional
+        BLOQUE 2: Lista de Contratos
     ═══════════════════════════════════════════ --}}
+    {{-- Contrato Activo --}}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <i class="bi bi-file-earmark-check me-2"></i> Contrato Activo
+        </div>
+        <div class="card-body">
+            @if($contratoActivo)
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Empresa</th>
+                                <th class="text-center">Inicio de Contrato</th>
+                                <th class="text-center">Finalización de Contrato</th>
+                                {{-- info adicional: --}}
+                                <th class="text-center">Cargo</th>
+                                <th class="text-center">Salario Básico</th>
+                                <th class="text-center">Ubicación de Caja</th>
+                                <th class="text-center">Carpeta Inicial</th>
+                                <th class="text-center">Carpeta Final</th>
+                                <th class="text-center">Documentos</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="">{{ $contratoActivo->empresa->nombre_empresa ?? '—' }}</td>
+                                <td class="text-center">{{ $contratoActivo->inicio_contrato
+                                        ? \Carbon\Carbon::parse($contratoActivo->inicio_contrato)->format('d/m/Y')
+                                        : '—' }}</td>
+                                <td class="text-center">{{ $contratoActivo->finalizacion_contrato
+                                        ? \Carbon\Carbon::parse($contratoActivo->finalizacion_contrato)->format('d/m/Y')
+                                        : '—' }}</td>
+                                {{-- Datos de informacionAdicional --}}
+                                <td class="text-center text-nowrap">{{ $contratoActivo->informacionAdicional->cargo ?? '—' }}</td>
+                                <td class="text-end text-nowrap">{{ $contratoActivo->informacionAdicional->salario_basico
+                                        ? '$ ' . number_format($contratoActivo->informacionAdicional->salario_basico, 2, ',', '.')
+                                        : '—' }}</td>
+                                <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->cajaUbica)
+                                        ? $contratoActivo->informacionAdicional->cajaUbica
+                                        : 'no detallada' }}
+                                </td>
+                                <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->carpetaIn)
+                                            ? $contratoActivo->informacionAdicional->carpetaIn
+                                            :'no detallada' }}
+                                </td>
+                                <td class="text-center text-nowrap">{{ filled($contratoActivo->informacionAdicional->carpetaFin)
+                                            ? $contratoActivo->informacionAdicional->carpetaFin
+                                            :'no detallada' }}
+                                </td>
 
-    @if($colaborador->informacionAdicional)
+                                {{-- Boton Ver Documentos --}}
+                                <td class = "text-center">
+                                    <a href="{{ route('contratos.documentos', $contratoActivo) }}" 
+                                        class="btn btn-sm btn-info"
+                                        title="Ver documentos del colaborador">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <span class="badge bg-light text-dark ms-1">{{ $contratoActivo->documentos_count }}</span>
+                                    </a>
+                                </td>
 
-        @php $info = $colaborador->informacionAdicional; @endphp
+                                <td class="text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        {{-- Ver info adicional --}}
+                                        <a href="{{ route('contrato.verInfo', $contratoActivo) }}"
+                                           class="btn btn-sm btn-primary"
+                                           title="Ver información Contrato"
+                                           data-bs-toggle="tooltip">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    
+                                        {{-- Editar info adicional --}}
+                                        <a href="{{ route('informacion_adicional.edit', $contratoActivo) }}"
+                                        class="btn btn-sm btn-warning"
+                                        title="Editar información Contrato"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
 
-        {{-- Cargo --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-briefcase me-2"></i> Información del Cargo
-            </div>
-            <div class="card-body">
-                <div class="row">
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Cargo</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->cargo ?? '—' }}</p>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Medios de Transporte</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->medios_transporte ?? '—' }}</p>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label text-muted small">Fecha Inicial</label>
-                        <p class="form-control-plaintext fw-semibold">
-                            {{ $info->fecha_inicial
-                                ? \Carbon\Carbon::parse($info->fecha_inicial)->format('d/m/Y')
-                                : '—' }}
-                        </p>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label text-muted small">Fecha Terminación</label>
-                        <p class="form-control-plaintext fw-semibold">
-                            {{ $info->fecha_terminacion
-                                ? \Carbon\Carbon::parse($info->fecha_terminacion)->format('d/m/Y')
-                                : '—' }}
-                        </p>
-                    </div>
-
+                                        {{-- Botón subir documento - dentro de las acciones del contrato activo --}}
+                                        <a href="#"
+                                        class="btn btn-sm btn-success btn-subir-documento"
+                                        data-url="{{ route('contratos.documentos.create', $contratoActivo) }}"
+                                        title="Subir documento"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-upload"></i>
+                                        </a>
+                                    
+                                        {{-- Inactivar contrato --}}
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger btn-inactivar-contrato"
+                                                data-url="{{ route('contrato.modal-inactivar', $colaborador) }}"
+                                                title="Inactivar contrato"
+                                                data-bs-toggle="tooltip">
+                                            <i class="bi bi-file-earmark-x"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            @else
+                <p class="text-muted mb-0">Este colaborador no tiene un contrato activo.</p>
+            @endif
         </div>
+    </div>
 
-        {{-- Seguridad Social --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-shield-plus me-2"></i> Seguridad Social
-            </div>
-            <div class="card-body">
-                <div class="row">
+    {{-- Contratos Inactivos --}}
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <i class="bi bi-file-earmark-x me-2"></i> Historial de Contratos Inactivos
+        </div>
+        <div class="card-body">
+            @if($contratosInactivos->isNotEmpty())
+                <div class = "table-responsive">
+                    <table class="table table-striped table-hover align-middle"style="white-space: nowrap;">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Inicio de Contrato</th>
+                                <th>Finalización de Contrato</th>
+                                <th>Cargo</th>
+                                <th>Salario Básico</th>
+                                <th>Ubicación de Caja</th>
+                                <th>Carpeta Inicial</th>
+                                <th>Carpeta Final</th>
+                                <th>Documentos</th>
+                                <th>Motivo Inactivación</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($contratosInactivos as $inactivo)
+                                <tr>
+                                    <td>{{ $inactivo->empresa->nombre_empresa ?? '—' }}</td>
+                                    <td class="text-center">{{ $inactivo->inicio_contrato
+                                            ? \Carbon\Carbon::parse($inactivo->inicio_contrato)->format('d/m/Y')
+                                            : '—' }}</td>
+                                    <td class="text-center">{{ $inactivo->finalizacion_contrato
+                                            ? \Carbon\Carbon::parse($inactivo->finalizacion_contrato)->format('d/m/Y')
+                                            : '—' }}</td>
+                                    <td>{{ $inactivo->informacionAdicional->cargo ?? '—' }}</td>
+                                    <td>{{ $inactivo->informacionAdicional->salario_basico
+                                            ? '$ ' . number_format($inactivo->informacionAdicional->salario_basico, 2, ',', '.')
+                                            : '—' }}</td>
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->cajaUbica)
+                                        ? $inactivo->informacionAdicional->cajaUbica
+                                        : 'no detallada' }}
+                                    </td>
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->carpetaIn)
+                                                ? $inactivo->informacionAdicional->carpetaIn
+                                                :'no detallada' }}
+                                    </td>
+                                    <td class="text-center text-nowrap">{{ filled($inactivo->informacionAdicional->carpetaFin)
+                                                ? $inactivo->informacionAdicional->carpetaFin
+                                                :'no detallada' }}
+                                    </td>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">EPS</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->eps ?? '—' }}</p>
-                    </div>
+                                    {{-- Boton Ver Documentos --}}
+                                    <td class = "text-center">
+                                        <a href="{{ route('contratos.documentos', $inactivo) }}" 
+                                            class="btn btn-sm btn-info"
+                                            title="Ver documentos del colaborador">
+                                            <i class="bi bi-file-earmark-text"></i> 
+                                            <span class="badge bg-light text-dark ms-1">{{ $inactivo->documentos_count }}</span>
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        @if($inactivo->motivo_inactivacion)
+                                            <span data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="{{ $inactivo->motivo_inactivacion }}"
+                                                style="cursor: pointer;">
+                                                <i class="bi bi-chat-left-text text-secondary fs-5"></i>
+                                            </span>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Fondo de Pensiones</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->fondo ?? '—' }}</p>
-                    </div>
+                                        {{-- Editar info adicional --}}
+                                        <a href="{{ route('informacion_adicional.edit', $inactivo) }}"
+                                        class="btn btn-sm btn-warning"
+                                        title="Editar información Contrato"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        
+                                        {{-- Ver info adicional --}}
+                                        <a href="{{ route('contrato.verInfo', $inactivo) }}"
+                                        class="btn btn-sm btn-secondary"
+                                        title="Ver información Contrato"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label text-muted small">Caja de Compensación</label>
-                        <p class="form-control-plaintext fw-semibold">{{ $info->caja_compensacion ?? '—' }}</p>
-                    </div>
-
+                                        {{-- Botón subir documento - dentro de las acciones del contrato activo --}}
+                                        <a href="#"
+                                        class="btn btn-sm btn-success btn-subir-documento"
+                                        data-url="{{ route('contratos.documentos.create', $inactivo) }}"
+                                        title="Subir documento"
+                                        data-bs-toggle="tooltip">
+                                            <i class="bi bi-upload"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            @else
+                <p class="text-muted mb-0">No hay contratos inactivos registrados.</p>
+            @endif
         </div>
-
-        {{-- Salario y Beneficios Base --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-cash-coin me-2"></i> Salario y Beneficios Base
-            </div>
-            <div class="card-body">
-                <div class="row">
-
-                    @php
-                        $camposSalario = [
-                            'salario_basico'       => 'Salario Básico',
-                            'sub_transporte'       => 'Subsidio de Transporte',
-                            'factor_prestacional'  => 'Factor Prestacional',
-                            'bono_servicio'        => 'Bono de Servicio',
-                            'bono_salud_y_vivienda'=> 'Bono Salud y Vivienda',
-                            'prima_riesgo'         => 'Prima de Riesgo',
-                        ];
-                    @endphp
-
-                    @foreach($camposSalario as $campo => $etiqueta)
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label text-muted small">{{ $etiqueta }}</label>
-                            <p class="form-control-plaintext fw-semibold">
-                                {{ $info->$campo !== null
-                                    ? '$ ' . number_format($info->$campo, 2, ',', '.')
-                                    : '—' }}
-                            </p>
-                        </div>
-                    @endforeach
-
-                </div>
-            </div>
-        </div>
-
-        {{-- Bonos y Auxilios Adicionales --}}
-        <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <i class="bi bi-gift me-2"></i> Bonos y Auxilios Adicionales
-            </div>
-            <div class="card-body">
-                <div class="row">
-
-                    @php
-                        $camposAdicionales = [
-                            'auxilio_formacion'  => 'Auxilio de Formación',
-                            'comision_fija'      => 'Comisión Fija',
-                            'productividad_fija' => 'Productividad Fija',
-                            'tiempo_extra_fijo'  => 'Tiempo Extra Fijo',
-                            'bono_mercado'       => 'Bono Mercado',
-                            'auxilio_equipo'     => 'Auxilio de Equipo',
-                            'recargo_nocturno'   => 'Recargo Nocturno',
-                            'trans_adicional'    => 'Transporte Adicional',
-                        ];
-                    @endphp
-
-                    @foreach($camposAdicionales as $campo => $etiqueta)
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label text-muted small">{{ $etiqueta }}</label>
-                            <p class="form-control-plaintext fw-semibold">
-                                {{ $info->$campo !== null
-                                    ? '$ ' . number_format($info->$campo, 2, ',', '.')
-                                    : '—' }}
-                            </p>
-                        </div>
-                    @endforeach
-
-                </div>
-            </div>
-        </div>
-
-    @else
-
-        {{-- Sin información adicional --}}
-        <div class="card mb-4">
-            <div class="card-body text-center text-muted py-4">
-                <i class="bi bi-clipboard2-x fs-2 mb-2 d-block"></i>
-                Este colaborador aún no tiene información adicional registrada.
-            </div>
-        </div>
-
-    @endif
-
+    </div>
 </div>
+
+{{-- Modal Inactivar Contrato --}}
+<div class="modal fade" id="modalInactivarContrato" tabindex="-1">
+    <div id="modalInactivarContratoContenido"></div>
+</div>
+
+{{-- Contenedor modal subir documento --}}
+<div class="modal fade" id="modalSubirDocumento" tabindex="-1">
+    <div id="modalSubirDocumentoContenido"></div>
+</div>
+
 @endsection
+
+@push('scripts')
+
+<script>
+
+    //*Tool tip para tabla de usuarios inactivos*//
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+        new bootstrap.Tooltip(el);
+    });
+
+    /*Asignacion y cargue de modal de inactivacion a traves de ajax */
+    document.querySelectorAll('.btn-inactivar-contrato').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const url = this.dataset.url;
+        const contenedor = document.getElementById('modalInactivarContratoContenido');
+
+        contenedor.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content p-4 text-center">
+                    <div class="spinner-border text-danger" role="status"></div>
+                    <p class="mt-2 mb-0">Cargando...</p>
+                </div>
+            </div>`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalInactivarContrato'));
+        modal.show();
+
+        fetch(url)
+            .then(res => res.text())
+            .then(html => { contenedor.innerHTML = html; })
+            .catch(() => {
+                contenedor.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content p-4 text-center text-danger">
+                            Error al cargar el modal.
+                        </div>
+                    </div>`;
+            });
+        });
+    });
+
+    /** Modal crear Documento**/
+    document.querySelectorAll('.btn-subir-documento').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const url = this.dataset.url;
+        const contenedor = document.getElementById('modalSubirDocumentoContenido');
+
+        contenedor.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content p-4 text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 mb-0">Cargando formulario...</p>
+                </div>
+            </div>`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalSubirDocumento'));
+        modal.show();
+
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                contenedor.innerHTML = html;
+
+                // ✅ Ahora sí existe el elemento en el DOM
+                const inputArchivo = document.getElementById('archivoModal');
+                if (inputArchivo) {
+                    inputArchivo.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        document.getElementById('preview-modal').src = URL.createObjectURL(file);
+                        document.getElementById('preview-container-modal').classList.remove('d-none');
+                    });
+                }
+            })
+            .catch(() => {
+                contenedor.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content p-4 text-center text-danger">
+                            Error al cargar el formulario.
+                        </div>
+                    </div>`;
+            });
+        });
+    });
+    /** Sweet alert para errores **/
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'No se Puede Crear El Contrato',
+            text: "El colaborador {{ $nombreCompleto }} ya tiene un contrato activo",
+            confirmButtonText: 'Entendido'
+        });
+    @endif
+</script>
+
+@endpush

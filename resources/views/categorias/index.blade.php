@@ -60,6 +60,13 @@
                 @endforelse
             </tbody>
         </table>
+        
+        <!-- PAGINACIÓN -->
+        @if($categorias->count() > 0)
+            <div class="d-flex justify-content-center mt-4">
+                {{ $categorias->links('pagination::bootstrap-4', ['view' => 'vendor.pagination.custom']) }}
+            </div>
+        @endif
     </div>
 </div>
 @endsection

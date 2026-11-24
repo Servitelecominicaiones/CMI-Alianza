@@ -15,7 +15,7 @@
 
 <div class="card">
     <div class="card-body">
-        <table class="table table-striped table-hover align-middle">
+        <table id="tablaEmpresas" class="table table-striped table-hover align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>NIT</th>
@@ -23,7 +23,6 @@
                     <th>Actividad</th>
                     <th>Dirección</th>
                     <th>Teléfono</th>
-                    <th class="text-center">Colaboradores</th>
                     <th class="text-center">Documentos</th>
                     <th>Detalle</th>
                     <th>Estado</th>
@@ -37,13 +36,9 @@
                         <td>{{ $empresa->nombre_empresa }}</td>
                         <td>{{ $empresa->actividad }}</td>
                         <td>
-                            {{ $empresa->ciudad }} - {{ $empresa->direccion }} - 
-                            {{ $empresa->barrio }}
+                            {{ $empresa->ciudad }} - {{ $empresa->direccion }} - {{ $empresa->barrio }}
                         </td>
                         <td>{{ $empresa->telefono }}</td>
-                        <td class="text-center">
-                            {{ $empresa->colaboradores_count }}
-                        </td>
 
                         {{-- Boton Ver Documentos --}}
                         <td class = "text-center">
@@ -78,49 +73,31 @@
                             {{-- Editar --}}
                             @if(in_array('empresas.editar', session('permisos_usuario', [])))
                                 <a href="{{ route('empresas.edit', $empresa->id_empresa) }}"
-                                   class="btn btn-sm btn-warning">
+                                class="btn btn-sm btn-warning"
+                                title="Editar empresa"> 
                                     <i class="bi bi-pencil"></i>
                                 </a>
                             @endif
 
-                            {{-- Inactivar --}}
-                            @if(
-                                in_array('empresas.eliminar', session('permisos_usuario', []))
-                                && $empresa->estado
-                            )
-                                <form method="POST"
-                                      action="{{ route('empresas.inactivar', $empresa) }}"
-                                      class="d-inline form-inactivar">
-                                    @csrf
-                                    @method('PUT')
-
-                                    <button type="submit" class="btn btn-sm btn-danger">
-                                        <i class="bi bi-x-circle"></i>
-                                    </button>
-                                </form>
+                            {{-- Inactivar contrato + empresa --}}
+                            @if(in_array('empresas.eliminar', session('permisos_usuario', [])) && $empresa->estado)
+                                <button type="button"
+                                        class="btn btn-sm btn-danger btn-inactivar-contrato-empresa"
+                                        data-url="{{ route('contratosEmpresa.modal-inactivar', $empresa) }}"
+                                        title="Inactivar empresa">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
                             @endif
 
-                            {{-- Activar --}}
-                            @if(
-                                in_array('empresas.eliminar', session('permisos_usuario', []))
-                                && !$empresa->estado
-                            )
-                                <form method="POST"
-                                      action="{{ route('empresas.activar', $empresa) }}"
-                                      class="d-inline form-activar">
-                                    @csrf
-                                    @method('PUT')
-
-                                    <button type="submit" class="btn btn-sm btn-success">
-                                        <i class="bi bi-check-circle"></i>
-                                    </button>
-                                </form>
+                            {{-- Crear nuevo contrato --}}
+                            @if(in_array('empresas.crear', session('permisos_usuario', [])) && !$empresa->estado)
+                                <a href="{{ route('contratosEmpresa.create', $empresa) }}"
+                                   class="btn btn-sm btn-success"
+                                   title="Crear nuevo contrato">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                </a>
                             @endif
-
                         </td>
-
-                        
-
                     </tr>
                 @empty
                     <tr>
@@ -131,6 +108,10 @@
                 @endforelse
             </tbody>
         </table>
+        {{-- Contenedor global del modal --}}
+        <div class="modal fade" id="modalInactivarContratoEmpresa" tabindex="-1">
+            <div id="modalInactivarContratoEmpresaContenido"></div>
+        </div>
     </div>
 </div>
 @endsection
@@ -177,6 +158,66 @@ document.querySelectorAll('.form-activar').forEach(form => {
                 this.submit();
             }
         });
+    });
+});
+
+
+/*Scripts de data table para tabla principal*/
+$(document).ready(function () {
+    $('#tablaEmpresas').DataTable({
+        responsive: true,
+        scrollX: true,
+        order: [],
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+        },
+        
+        dom: 
+            "<'row mb-3'<'col-md-6'B><'col-md-6'f>>" +
+            "<'row'<'col-12'tr>>" +
+            "<'row mt-3'<'col-md-6'l><'col-md-6'p>>",
+            
+        buttons: [{
+            extend: 'excel',
+            text: '<i class="bi bi-file-earmark-excel"></i> Exportar a excel',
+            className: 'btn btn-success',
+            title: 'Empresas del sistema',
+            exportOptions: {
+                columns: [0,1,2,3,4,5,8]
+                }
+            }
+        ]
+    });
+});
+
+/*Modal inactivar contrato*/
+document.querySelectorAll('.btn-inactivar-contrato-empresa').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const url = this.dataset.url;
+        const contenedor = document.getElementById('modalInactivarContratoEmpresaContenido');
+
+        contenedor.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content p-4 text-center">
+                    <div class="spinner-border text-danger" role="status"></div>
+                    <p class="mt-2 mb-0">Cargando...</p>
+                </div>
+            </div>`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalInactivarContratoEmpresa'));
+        modal.show();
+
+        fetch(url)
+            .then(res => res.text())
+            .then(html => { contenedor.innerHTML = html; })
+            .catch(() => {
+                contenedor.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content p-4 text-center text-danger">
+                            Error al cargar el modal.
+                        </div>
+                    </div>`;
+            });
     });
 });
 </script>

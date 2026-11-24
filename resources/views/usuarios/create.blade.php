@@ -66,7 +66,7 @@
         {{-- Rol --}}
         <div class="mb-3">
             <label class="form-label">Rol</label>
-            <select name="rol_id" class="form-select" required>
+            <select name="rol_id" class="form-select select2" required>
                 <option value="">Seleccione un rol</option>
                 @foreach($roles as $rol)
                     <option value="{{ $rol->id }}">
@@ -160,3 +160,17 @@ document.getElementById('formCrearUsuario').addEventListener('submit', function 
 </script>
 
 @endsection
+
+@push('scripts')
+<script>
+    /* ==== Select2 ====*/
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Escribe para Buscar...",
+            allowClear: true,
+            width: '100%',
+            theme: 'bootstrap-5'
+        });
+    });
+</script>
+@endpush

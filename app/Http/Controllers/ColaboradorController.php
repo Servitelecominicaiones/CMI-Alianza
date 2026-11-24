@@ -6,29 +6,56 @@ use Illuminate\Http\Request;
 use App\Models\Colaborador;
 use App\Models\Empresa;
 use App\Models\Identificacion;
+use Yajra\DataTables\Facades\DataTables;
 
 class ColaboradorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $colaboradores = Colaborador::with('empresa','identificacion')->get();
+        
+        /* RESPUESTA API */
+        if ($request->expectsJson() && !$request->ajax()) {
+            $colaboradores = Colaborador::with('identificacion')->paginate(50);
+            return response()->json([
+                'success' => true,
+                'data'    => $colaboradores->items(),
+                'meta'    => [
+                    'total'        => $colaboradores->total(),
+                    'current_page' => $colaboradores->currentPage(),
+                    'last_page'    => $colaboradores->lastPage(),
+                ]
+            ]);
+        }
 
-        return view('colaboradores.index',compact('colaboradores'));
+        /* RESPUESTA DATATABLES (ajax interno de la vista) */
+        if ($request->ajax()) {
+            $query = Colaborador::with('identificacion')->select('colaborador.*')->orderBy('estado', 'desc');
+
+            return DataTables::of($query)
+                ->addColumn('tipo_identificacion', fn($c) => $c->identificacion->tipo_identificacion ?? '')
+                ->addColumn('nombre_completo', fn($c) => trim("$c->primer_nombre $c->segundo_nombre $c->primer_apellido $c->segundo_apellido"))
+                ->addColumn('estado_badge', fn($c) => $c->estado
+                    ? '<span class="badge bg-success">Activo</span>'
+                    : '<span class="badge bg-secondary">Inactivo</span>')
+                ->rawColumns(['estado_badge'])
+                ->make(true);
+        }
+
+        /* RESPUESTA WEB */
+        return view('colaboradores.index');
     }
 
     public function create()
     {
-        $empresas = Empresa::where('estado',1)->get();
         $identificaciones = Identificacion::where('estado',1)->get();
 
-        return view('colaboradores.create', compact('empresas','identificaciones'));
+        return view('colaboradores.create', compact('identificaciones'));
         
     }
 
     public function store(Request $request){
 
         $request->validate([
-            'id_empresa' => 'required|exists:empresa,id_empresa',
             'id_tipo_identificacion' => 'required|exists:identificacion,id_identificacion',
     
             'numero_identificacion' => 'required|string|max:50|unique:colaborador,numero_identificacion',
@@ -52,13 +79,12 @@ class ColaboradorController extends Controller
             'telefono_residencial' => 'nullable|string|max:20',
             'telefono_celular' => 'nullable|string|max:20',
     
-            'estudios' => 'nullable|string|max:255',
+            'estudios' => 'nullable|string|max:255'
     
-            'estado' => 'required|boolean'
+            
         ]);
 
-        Colaborador::create([
-            'id_empresa' => $request->id_empresa,
+        $colaborador = Colaborador::create([
             'id_tipo_identificacion' => $request->id_tipo_identificacion,
             'numero_identificacion' => $request->numero_identificacion,
             'primer_nombre' => $request->primer_nombre,
@@ -74,9 +100,19 @@ class ColaboradorController extends Controller
             'telefono_residencial' => $request->telefono_residencial,
             'telefono_celular' => $request->telefono_celular,
             'estudios' => $request->estudios,
-            'estado' => $request->estado,
+            'estado' => 0
         ]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Colaborador Creado Exitosamente',
+                'data'=> $colaborador
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return redirect()
             ->route('colaboradores.index')
             ->with('success', 'Colaborador creado Exitosamente');
@@ -84,13 +120,12 @@ class ColaboradorController extends Controller
 
     public function edit(Colaborador $colaborador)
     {
-        $empresas =Empresa::where('estado',1)->get();
+        
         $identificaciones =Identificacion::where('estado',1)->get();
 
         return view('colaboradores.edit',
         compact(
             'colaborador',
-            'empresas',
             'identificaciones'
         ));
     }
@@ -98,7 +133,6 @@ class ColaboradorController extends Controller
     public function update(Request $request, Colaborador $colaborador)
     {
         $request -> validate([
-            'id_empresa' => 'required|exists:empresa,id_empresa',
             'id_tipo_identificacion' => 'required|exists:identificacion,id_identificacion',
 
             'numero_identificacion' => 'required|string|max:50|unique:colaborador,numero_identificacion,' . $colaborador->id_colaborador . ',id_colaborador',
@@ -116,13 +150,10 @@ class ColaboradorController extends Controller
             'estado_civil' => 'nullable|string|max:50',
             'telefono_residencial' => 'nullable|string|max:20',
             'telefono_celular' => 'nullable|string|max:20',
-            'estudios' => 'nullable|string|max:255',
-
-            'estado' => 'required|boolean'
+            'estudios' => 'nullable|string|max:255'
         ]);
 
         $colaborador->update($request->only([
-            'id_empresa',
             'id_tipo_identificacion',
             'numero_identificacion',
             'primer_nombre',
@@ -137,19 +168,37 @@ class ColaboradorController extends Controller
             'estado_civil',
             'telefono_residencial',
             'telefono_celular',
-            'estudios',
-            'estado'
+            'estudios'
         ]));
 
-    return redirect()
-        ->route('colaboradores.index')
-        ->with('success', 'Colaborador actualizado correctamente');
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Colaborador editado exitosamente',
+                'data'=> $colaborador
+            ]);
+        }
+
+        /** RESPUESTA WEB */
+        return redirect()
+            ->route('colaboradores.index')
+            ->with('success', 'Colaborador actualizado correctamente');
     }
 
-    public function inactivar(Colaborador $colaborador)
+    public function inactivar(Colaborador $colaborador , Request $request)
     {
+
         if ($colaborador->estado == 0) {
-        return redirect()
+            /* RESPUESTA API error */
+            if($request->expectsJson()){
+                return response()->json([
+                    'success'=>false,
+                    'message'=>'El colaborador ya esta inactivo'
+                ]);
+            }
+
+            return redirect()
             ->route('colaboradores.index')
             ->with('success', 'El colaborador ya está inactivo.');
         }
@@ -158,6 +207,18 @@ class ColaboradorController extends Controller
             'estado' => 0
         ]);
 
+        /* RESPUESTA API */
+        if($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'data'=> [
+                    "colaborador"=>$colaborador->numero_identificacion,
+                    "Nuevo Estado"=>$colaborador->estado
+                ]
+            ]);
+        }
+
+        /** RESPUESTA WEB */
         return redirect()
             ->route('colaboradores.index')
             ->with('success', 'Colaborador inactivado correctamente.');
@@ -193,7 +254,21 @@ class ColaboradorController extends Controller
 
     public function detalle(Colaborador $colaborador)
     {
-        $colaborador->load(['empresa', 'identificacion', 'informacionAdicional']);
-        return view('colaboradores.detalle', compact('colaborador'));
+        $colaborador->load('identificacion');
+
+        $contratoActivo = $colaborador->contratos()
+            ->where('estado', 1)
+            ->with(['empresa', 'informacionAdicional'])
+            ->withCount('documentos')
+            ->first();
+        
+        $contratosInactivos = $colaborador->contratos()
+            ->where('estado',0)
+            ->with(['empresa','informacionAdicional'])
+            ->withCount('documentos')
+            ->orderBy('id_contrato','desc')
+            ->get();
+
+        return view('colaboradores.detalle', compact('colaborador', 'contratoActivo','contratosInactivos'));
     }
 }

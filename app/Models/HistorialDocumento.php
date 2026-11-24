@@ -13,6 +13,7 @@ class HistorialDocumento extends Model
 
     protected $fillable = [
         'documento_id',
+        'nombre_documento',
         'usuario_id',
         'accion',
         'ruta_anterior',

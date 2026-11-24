@@ -31,12 +31,15 @@ class InformacionAdicionalColaborador extends Model
         'recargo_nocturno',
         'trans_adicional',
         'fecha_inicial',
-        'fecha_terminacion'
+        'fecha_terminacion',
+        'cajaUbica',
+        'carpetaIn',
+        'carpetaFin'
     ];
 
     public $timestamps = false;
 
-    public function colaborador(){
-        return $this->belongsTo(Colaborador::class, 'id_colaborador');
+    public function contratos(){
+        return $this->hasMany(Contrato::class, 'id_informacion_adicional');
     }
 }

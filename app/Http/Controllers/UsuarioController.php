@@ -7,12 +7,22 @@ use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\CryptoHelper;
+use function PHPUnit\Framework\returnArgument;
 
 class UsuarioController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $usuarios = User::with('rol')->get();
+
+        /** RESPUESTA API**/
+        if($request->expectsJson()){
+            return response()->json([
+                'success' => true,
+                'data' => $usuarios
+            ]);
+        }
+        /** RESPUESTA WEB**/
         return view('usuarios.index', compact('usuarios'));
     }
 
@@ -24,7 +34,7 @@ class UsuarioController extends Controller
 
     public function store(Request $request)
     {
-       $request->validate([
+        $request->validate([
             'nombre'   => 'required|string|max:255',
             'email'    => 'required|email|unique:usuarios,email',
             'rol_id'   => 'required|exists:roles,id',
@@ -49,14 +59,26 @@ class UsuarioController extends Controller
             'password.regex'    => 'La contraseña debe contener al menos una mayúscula, dos números y un carácter especial.',
         ]);
 
-        User::create([
+        $usuario = User::create([
             'nombre'   => $request->nombre,
             'email'    => $request->email,
             'password' => CryptoHelper::Enc('enc',$request->password),
             'rol_id'   => $request->rol_id,
             'estado'   => $request->estado,
+            'password_changed_at' => now(),
         ]);
 
+        /** RESPUESTA API **/
+
+        if ($request -> expectsJson()){
+            return response()->json([
+                'success' => true,
+                'message' => 'usuario creado exitosamente',
+                'data' => $usuario
+            ],201);
+        }
+
+        /* RESPUESTA WEB */
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario creado correctamente');
@@ -101,20 +123,44 @@ class UsuarioController extends Controller
         // SOLO si escribió contraseña
         if ($request->filled('password')) {
             $data['password'] = CryptoHelper::Enc('enc',$request->password);
+            $data['password_changed_at'] = now();
         }
 
         $usuario->update($data);
+        
+        /** Respuesta api **/
+        if ($request->expectsJson()){
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario actualizado correctamente',
+                'data'    => $usuario->fresh()
+            ],201);
+        }
 
+        /** Respuesta Web **/
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario actualizado correctamente');
     }
 
 
-    public function destroy(User $usuario)
+    public function destroy(User $usuario, Request $request)
     {
         $usuario->update(['estado' => 0]);
 
+        /** Respuesta Api **/
+        if ($request->expectsJson()){
+            return response()->json([
+                'success'=>true,
+                'message'=>'Usuario inactivado exitosamente',
+                'data' => [
+                        $usuario -> nombre,
+                        $usuario -> estado
+                ]
+            ]);
+        }
+
+        /** Respuesta Web **/
         return redirect()
             ->route('usuarios.index')
             ->with('success', 'Usuario inactivado');

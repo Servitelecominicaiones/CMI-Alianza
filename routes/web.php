@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\PermissionMiddleware;
+use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DocumentoController;
@@ -13,6 +14,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ColaboradorController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\InformacionAdicionalController;
+use App\Http\Controllers\ContratoController;
+use App\Http\Controllers\ContratoEmpresaController;
+use App\Http\Controllers\PerfilController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,20 +57,43 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Perfil
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/perfil', [PerfilController::class, 'index'])
+        ->name('perfil.index');
+
+    Route::put('/perfil/password', [PerfilController::class, 'actualizarPassword'])
+        ->name('perfil.password');
+
+    /*
+    |--------------------------------------------------------------------------
     | Documentos
     |--------------------------------------------------------------------------
     */
     Route::get('documentos', [DocumentoController::class,'index'])->name('documentos.index');
     Route::post('documentos', [DocumentoController::class,'store'])->name('documentos.store');
 
+    Route::get('documentos/papelera', [DocumentoController::class, 'papelera'])
+        ->name('documentos.papelera')
+        ->middleware('permission:documentos.eliminar');
+
     Route::get('/documentos/{id}/preview', [DocumentoController::class, 'preview'])
         ->name('documentos.preview')
         ->middleware('auth');
 
-    Route::put('documentos/{id}', [DocumentoController::class,'destroy'])
+    Route::put('documentos/inactivar/{id}', [DocumentoController::class,'destroy'])
         ->name('documentos.destroy')
         ->middleware('permission:documentos.eliminar');
 
+    Route::patch('/documentos/{documento}/activar', [DocumentoController::class, 'activar'])
+        ->name('documentos.activar')
+        ->middleware('permission:documentos.editar');
+
+    Route::delete('/documentos/{documento}/eliminar-permanente', [DocumentoController::class, 'eliminarPermanente'])
+        ->name('documentos.eliminarPermanente')
+        ->middleware('permission:documentos.eliminar');
+    
     Route::post('documentos/{id}/duplicar', [DocumentoController::class,'duplicar'])
         ->name('documentos.duplicar');
 
@@ -87,6 +114,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('documentos/{documento}/preview', [DocumentoController::class, 'preview'])
         ->name('documentos.preview');
+    
+    Route::get('documentos/search/colaboradores',[DocumentoController::class, 'searchColaboradores'])
+        ->name('documentos.search.colaboradores');
+    
+    Route::get('documentos/search/contratos',[DocumentoController::class, 'searchContratos'])
+        ->name('documentos.search.contratos');
 
     /*
     |--------------------------------------------------------------------------
@@ -223,16 +256,20 @@ Route::middleware(['auth'])->group(function () {
     | Historial Documentos
     |--------------------------------------------------------------------------
     */
+    Route::get('historial-documentos/data', [HistorialDocumentoController::class, 'data'])
+    ->name('historial_documentos.data')
+    ->middleware('permission:historial.ver');
+
+    Route::get('historial-documentos/export', [HistorialDocumentoController::class, 'exportExcel'])
+        ->name('historial_documentos.export')
+        ->middleware('permission:historial.ver');
+
     Route::get('historial-documentos', [HistorialDocumentoController::class, 'index'])
         ->name('historial_documentos.index')
         ->middleware('permission:historial.ver');
 
     Route::get('historial-documentos/{historialDocumento}', [HistorialDocumentoController::class, 'show'])
         ->name('historial_documentos.show')
-        ->middleware('permission:historial.ver');
-
-    Route::get('/historial-documentos', [HistorialDocumentoController::class, 'index'])
-        ->name('historial.index')
         ->middleware('permission:historial.ver');
 
     /*
@@ -293,13 +330,13 @@ Route::middleware(['auth'])->group(function () {
         ->name('informacion_adicional.store')
         ->middleware('permission:colaboradores.crear');
 
-    // Ver formulario de editar → permiso editar
-    Route::get('/colaboradores/{colaborador}/informacion-adicional/editar', [InformacionAdicionalController::class, 'edit'])
+    // Ver formulario de editar → permiso editar (opera sobre un contrato puntual, activo o inactivo)
+    Route::get('/contratos/{contrato}/informacion-adicional/editar', [InformacionAdicionalController::class, 'edit'])
         ->name('informacion_adicional.edit')
         ->middleware('permission:colaboradores.editar');
 
     // Actualizar → permiso editar
-    Route::put('/colaboradores/{colaborador}/informacion-adicional', [InformacionAdicionalController::class, 'update'])
+    Route::put('/contratos/{contrato}/informacion-adicional', [InformacionAdicionalController::class, 'update'])
         ->name('informacion_adicional.update')
         ->middleware('permission:colaboradores.editar');
 
@@ -345,4 +382,75 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/empresas/{empresa}/detalle', [EmpresaController::class, 'detalle'])
         ->name('empresas.detalle')
         ->middleware('permission:empresas.ver');
+    
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contratos
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('colaboradores/{colaborador}/contrato/modal-inactivar', [ContratoController::class, 'inactivarModal'])
+        ->name('contrato.modal-inactivar')
+        ->Middleware('permission:colaboradores.eliminar');
+
+    Route::put('colaboradores/{colaborador}/contrato/inactivar', [ContratoController::class, 'inactivar'])
+        ->name('contrato.inactivar')
+        ->Middleware('permission:colaboradores.eliminar');
+
+    Route::get('contratos/{contrato}/info', [ContratoController::class, 'verInfo'])
+        ->name('contrato.verInfo')
+        ->Middleware('permission:colaboradores.ver');
+
+    Route::get('contratos/{contrato}/documentos',[ContratoController::class , 'documentos'])
+        ->name('contratos.documentos')
+        ->Middleware('permission:colaboradores.ver');
+
+    Route::get('contratos/{contrato}/documento/crear', [DocumentoController::class, 'createParaContrato'])
+    ->name('contratos.documentos.create')
+    ->Middleware('permission:colaboradores.crear');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contratos Empresas
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('empresas/{empresa}/contrato/crear', [ContratoEmpresaController::class, 'create'])
+        ->name('contratosEmpresa.create')
+        ->middleware('permission:empresas.crear');
+
+    Route::post('empresas/{empresa}/contrato', [ContratoEmpresaController::class, 'store'])
+        ->name('contratosEmpresa.store')
+        ->middleware('permission:empresas.crear');
+
+    Route::get('empresas/{empresa}/contrato/editar', [ContratoEmpresaController::class, 'edit'])
+        ->name('contratosEmpresa.edit')
+        ->middleware('permission:empresas.editar');
+        
+    Route::put('empresas/{empresa}/contrato/actualizar', [ContratoEmpresaController::class, 'update'])
+        ->name('contratosEmpresa.update')
+        ->middleware('permission:empresas.editar');
+
+    Route::get('empresas/{empresa}/contrato/modal-inactivar', [ContratoEmpresaController::class, 'inactivarModal'])
+        ->name('contratosEmpresa.modal-inactivar')
+        ->middleware('permission:empresas.eliminar');
+
+    Route::put('empresas/{empresa}/contrato/inactivar', [ContratoEmpresaController::class, 'inactivar'])
+        ->name('contratosEmpresa.inactivar')
+        ->middleware('permission:empresas.eliminar');
+
+    Route::get('contrato-empresa/{contratoEmpresa}/info', [ContratoEmpresaController::class, 'verInfo'])
+        ->name('contratosEmpresa.verInfo')
+        ->middleware('permission:empresas.ver');
+    
+    // Ver documentos de un contrato empresa
+    Route::get('contrato-empresa/{contratoEmpresa}/documentos', [ContratoEmpresaController::class, 'documentos'])
+        ->name('contratosEmpresa.documentos')
+        ->middleware('permission:empresas.ver');
+
+    // Modal subir documento a un contrato empresa
+    Route::get('contrato-empresa/{contratoEmpresa}/documento/crear', [DocumentoController::class, 'createParaContratoEmpresa'])
+        ->name('contratosEmpresa.documentos.create')
+        ->middleware('permission:empresas.crear');
 });

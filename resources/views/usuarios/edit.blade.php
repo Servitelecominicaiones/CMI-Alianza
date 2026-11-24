@@ -72,7 +72,7 @@
             <label class="form-label">Rol</label>
             <select
                 name="rol_id"
-                class="form-select @error('rol_id') is-invalid @enderror"
+                class="form-select @error('rol_id') is-invalid @enderror select2"
                 required
             >
                 @foreach($roles as $rol)
@@ -141,6 +141,16 @@ document.getElementById('formEditarUsuario').addEventListener('submit', function
 
             this.submit();
         }
+    });
+});
+
+/* ==== Select2 ====*/
+$(document).ready(function() {
+    $('.select2').select2({
+        placeholder: "Escribe para Buscar...",
+        allowClear: true,
+        width: '100%',
+        theme: 'bootstrap-5'
     });
 });
 </script>
