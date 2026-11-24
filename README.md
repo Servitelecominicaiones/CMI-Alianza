@@ -51,7 +51,7 @@ docker exec cmi_app php artisan key:generate --force
 docker exec cmi_app php artisan migrate --force
 ```
 
-> **Nota sobre la base de datos:** las tablas de Laravel (users, cache, jobs, tokens) se crean con `php artisan migrate`. El esquema de negocio (empresas, colaboradores, documentos, roles, permisos, etc.) **no está versionado como migraciones** todavía; se restaura desde el dump de la base de datos. Pídelo al equipo. *(Ver "Pendientes técnicos".)*
+> **Nota sobre la base de datos:** `php artisan migrate` crea tanto las tablas de Laravel como las de negocio (empresas, colaboradores, documentos, roles, permisos, etc.). Luego `php artisan db:seed` carga roles, permisos, catálogos y el usuario administrador. El esquema de negocio fue reconstruido a partir de los modelos; si existe el dump oficial de producción, ese prevalece.
 
 > **Contraseñas:** se almacenan cifradas con `App\Helpers\CryptoHelper` (AES). Para crear un usuario manualmente, cifra la contraseña con `CryptoHelper::Enc('enc', '...')`.
 
@@ -103,15 +103,20 @@ Los datos viven en **volúmenes con nombre** (independientes del ciclo de vida d
 
 ### Primer arranque (base de datos)
 
-Como la BD arranca vacía, tras levantar el stack hay que preparar el esquema:
+Como la BD arranca vacía, tras levantar el stack hay que crear el esquema y los datos iniciales (una sola vez):
 
 ```bash
-docker exec cmi-app php artisan migrate --force        # tablas de Laravel
-# Esquema de negocio (empresas, colaboradores, documentos, roles...):
-# docker exec -i cmi-mysql mysql -ucmi -p<DB_PASSWORD> cmi < dump.sql
+docker exec cmi-app php artisan migrate --force     # crea TODAS las tablas (Laravel + negocio)
+docker exec cmi-app php artisan db:seed --force     # roles, permisos, catálogos y usuario admin
 ```
 
-> El esquema de negocio **no está en migraciones** todavía (ver "Pendientes técnicos"); impórtalo desde el dump del equipo. Sin él, la app levanta pero fallará al consultar esas tablas.
+Esto crea un usuario administrador inicial:
+
+- **Usuario:** `admin@cmi.local`  ·  **Contraseña:** `Admin123*`  → **cámbiala tras el primer ingreso.**
+
+(Se pueden fijar otras credenciales con las variables `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` antes del seed.)
+
+> El esquema de negocio fue **reconstruido** a partir de los modelos (no existía como migraciones). Si el equipo dispone del dump oficial de producción, ese es la fuente de verdad; cárgalo en su lugar.
 
 ---
 
@@ -129,7 +134,7 @@ Flujo sugerido: trabajar en `dev` → fusionar a `main` cuando esté estable →
 
 ## Pendientes técnicos
 
-- [ ] **Versionar el esquema de BD** como migraciones de Laravel (hoy depende de un dump externo).
+- [x] **Versionar el esquema de BD** como migraciones de Laravel (reconstruido en `2026_11_24_000001_create_business_schema`; validar contra el dump oficial cuando esté disponible).
 - [ ] **No guardar la llave privada SSL** (`docker/nginx/ssl/key.pem`) en el repositorio; regenerarla.
 - [ ] **Sacar del repositorio los PDFs reales** de `public/bodega_documental/` (contienen datos personales).
 - [ ] **Reemplazar el cifrado reversible de contraseñas** por un hash seguro (`bcrypt`/`argon2`).
