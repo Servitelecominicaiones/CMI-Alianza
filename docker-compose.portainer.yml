@@ -1,0 +1,103 @@
+# ---------------------------------------------------------------------------
+# CMI Alianza — Stack para Portainer + Traefik
+# ---------------------------------------------------------------------------
+# Diferencias con docker-compose.yml (que publica puertos 8080/8443 directo):
+#   - NO publica puertos al host  -> Traefik gestiona el ingreso (evita conflictos
+#     de puertos cuando conviven varios stacks en el mismo servidor).
+#   - Traefik termina el TLS       -> nginx solo expone el puerto 80 interno;
+#     no se usa el certificado autofirmado de docker/nginx/ssl.
+#   - Doble red: `proxy` (externa, la de Traefik) solo en nginx, e `internal`
+#     (privada) para app <-> nginx <-> mysql.
+#   - Reutiliza los MISMOS datos del servidor actual (DATA_ROOT=/data), por lo
+#     que no requiere migrar la base ni los documentos ya cargados.
+#
+# Variables a definir en el entorno del stack (Portainer > Stack > Environment):
+#   APP_HOST       (ej. cmi-dev.servitel.co)
+#   TRAEFIK_NET    (nombre de la red externa de Traefik; por defecto net_proxy)
+#   TRAEFIK_ENTRYPOINT (por defecto websecure)
+#   TRAEFIK_CERTRESOLVER (opcional; si Traefik usa Let's Encrypt, ej. le)
+#   DATA_ROOT      (raíz de datos persistentes en el host; por defecto /data)
+#   DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_ROOT_PASSWORD
+#
+# IMPORTANTE: antes de desplegar este stack, DETÉN el stack anterior
+# (docker-compose.yml). MySQL no puede abrir el mismo directorio de datos
+# (/data/cmi_mysql) desde dos contenedores a la vez.
+# ---------------------------------------------------------------------------
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cmi_app
+    container_name: cmi_app
+    restart: unless-stopped
+    working_dir: /var/www
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options: { max-size: "50m", max-file: "3" }
+    volumes:
+      - .:/var/www
+      - ${DATA_ROOT:-/data}/cmi_storage:/var/www/storage/app
+      - ${DATA_ROOT:-/data}:/var/www/public/Documentos
+    networks:
+      - internal
+
+  nginx:
+    image: nginx:alpine
+    container_name: cmi_nginx
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options: { max-size: "20m", max-file: "3" }
+    volumes:
+      - .:/var/www
+      - ${DATA_ROOT:-/data}/cmi_storage:/var/www/storage/app
+      - ${DATA_ROOT:-/data}:/var/www/public/Documentos
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - proxy
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NET:-net_proxy}"
+      - "traefik.http.routers.cmi.rule=Host(`${APP_HOST:-cmi-dev.servitel.co}`)"
+      - "traefik.http.routers.cmi.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.cmi.tls=true"
+      # Descomenta si Traefik emite certificados con un resolver (Let's Encrypt):
+      # - "traefik.http.routers.cmi.tls.certresolver=${TRAEFIK_CERTRESOLVER:-le}"
+      - "traefik.http.services.cmi.loadbalancer.server.port=80"
+
+  mysql:
+    image: mysql:8.0
+    container_name: cmi_mysql
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options: { max-size: "50m", max-file: "3" }
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ${DATA_ROOT:-/data}/cmi_mysql:/var/lib/mysql
+    networks:
+      - internal
+
+# ---------------------------------------------------------------------------
+# Redes
+#   proxy    -> red EXTERNA ya creada por Traefik (no la crea este stack).
+#   internal -> red privada del stack (sin salida al proxy).
+# ---------------------------------------------------------------------------
+networks:
+  proxy:
+    external: true
+    name: ${TRAEFIK_NET:-net_proxy}
+  internal:
+    driver: bridge
