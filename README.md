@@ -59,7 +59,13 @@ docker exec cmi_app php artisan migrate --force
 
 ## Despliegue en servidor (Portainer + Traefik)
 
-El stack `docker-compose.portainer.yml` está preparado para un servidor con **Traefik** como reverse proxy (ingreso por dominio y TLS). A diferencia de `docker-compose.yml` (que publica puertos directamente), este **no publica puertos**: evita conflictos cuando conviven varios stacks y delega el enrutamiento y el certificado en Traefik.
+El stack `docker-compose.portainer.yml` está preparado para desplegar en el servidor con **Portainer CE** (stack desde Git) y **Traefik** como reverse proxy. A diferencia de `docker-compose.yml`:
+
+- **`pull_policy: build`** en las imágenes propias (`app`, `nginx`): Portainer las **construye** en vez de intentar descargarlas de un registro (si no, falla con `pull access denied for cmi_app`). Para tomar cambios: *Pull and redeploy* con *Re-pull image and redeploy*.
+- **Sin bind mounts del repo**: el código viaja dentro de las imágenes (`COPY . .`), porque Portainer clona el repo en su propio contenedor y esa ruta no existe en el host.
+- **No publica puertos**: el ingreso va por Traefik (red externa `net_proxy`, TLS en Traefik). Evita conflictos entre stacks.
+- **Variables por la sección *Environment* del stack**, no por un `.env` del repo.
+- Datos persistentes en volúmenes con nombre: `cmi-mysql-data`, `cmi-storage`, `cmi-bodega`.
 
 **Variables del stack** — en Portainer se definen en **Stack → *Environment*** (no hace falta un `.env` en el repo; de hecho no existe porque está en `.gitignore`). La app toma su configuración de estas variables de entorno:
 
@@ -69,12 +75,11 @@ El stack `docker-compose.portainer.yml` está preparado para un servidor con **T
 | `APP_HOST` | `cmi-dev.servitel.co` | Dominio que publica Traefik |
 | `APP_URL` | `https://cmi-dev.servitel.co` | URL base (igual al dominio, con `https`) |
 | `APP_ENV` / `APP_DEBUG` / `APP_LOCALE` | `local` / `true` / `es` | (Opcionales) por defecto dev |
-| `TRAEFIK_NET` | `net_proxy` | Red externa de Traefik |
 | `TRAEFIK_ENTRYPOINT` | `websecure` | Entrypoint de Traefik |
-| `TRAEFIK_CERTRESOLVER` | `le` | (Opcional) resolver de certificados |
-| `DATA_ROOT` | `/data` | Raíz de datos persistentes en el host |
-| `DB_DATABASE` / `DB_USERNAME` / `DB_PASSWORD` | | Credenciales MySQL |
-| `DB_ROOT_PASSWORD` | | (Opcional) root de MySQL |
+| `TRAEFIK_CERTRESOLVER` | `le` | (Opcional) resolver de certificados (descomentar en el compose) |
+| `DB_DATABASE` / `DB_USERNAME` | `cmi` / `cmi` | Base y usuario MySQL |
+| `DB_PASSWORD` | | **Obligatoria.** Contraseña del usuario MySQL |
+| `DB_ROOT_PASSWORD` | | **Obligatoria.** Contraseña root de MySQL |
 
 > **Despliegue por CLI** (en vez de Portainer): puedes poner estas variables en un archivo `.env` junto al compose y levantar con `docker compose --env-file .env -f docker-compose.portainer.yml up -d --build`.
 
@@ -86,27 +91,27 @@ docker network create net_proxy   # solo si aún no existe
 
 Nginx enruta internamente en el puerto 80; Traefik termina el TLS, por lo que **no se usa** el certificado autofirmado de `docker/nginx/ssl`.
 
-### Datos persistentes y migración
+### Datos persistentes
 
-El stack reutiliza los **mismos directorios de datos del servidor** bajo `DATA_ROOT` (por defecto `/data`), de modo que **no hay que migrar** la base ni los documentos ya cargados:
+Los datos viven en **volúmenes con nombre** (independientes del ciclo de vida de los contenedores):
 
-| Ruta en el host | Contenido |
+| Volumen | Contenido |
 |---|---|
-| `${DATA_ROOT}/cmi_mysql` | Datos de MySQL |
-| `${DATA_ROOT}/cmi_storage` | `storage/app` de Laravel |
-| `${DATA_ROOT}` | Documentos cargados (montados en `public/Documentos`) |
+| `cmi-mysql-data` | Base de datos MySQL |
+| `cmi-storage` | `storage/app` de Laravel |
+| `cmi-bodega` | Documentos cargados (`public/bodega_documental`) |
 
-Para pasar del `docker-compose.yml` actual a este stack en el mismo servidor:
+### Primer arranque (base de datos)
+
+Como la BD arranca vacía, tras levantar el stack hay que preparar el esquema:
 
 ```bash
-# 1. Detener el stack anterior (libera el directorio de datos de MySQL)
-docker compose -f docker-compose.yml down
-
-# 2. Desplegar el stack de Portainer/Traefik (CLI o desde la UI de Portainer)
-docker compose -f docker-compose.portainer.yml up -d --build
+docker exec cmi-app php artisan migrate --force        # tablas de Laravel
+# Esquema de negocio (empresas, colaboradores, documentos, roles...):
+# docker exec -i cmi-mysql mysql -ucmi -p<DB_PASSWORD> cmi < dump.sql
 ```
 
-> **Importante:** MySQL no puede abrir `${DATA_ROOT}/cmi_mysql` desde dos contenedores a la vez. Detén siempre el stack anterior antes de levantar este. Para un servidor nuevo, apunta `DATA_ROOT` a un directorio vacío y ejecuta `php artisan migrate` + el dump de la base.
+> El esquema de negocio **no está en migraciones** todavía (ver "Pendientes técnicos"); impórtalo desde el dump del equipo. Sin él, la app levanta pero fallará al consultar esas tablas.
 
 ---
 

@@ -1,31 +1,36 @@
 # ---------------------------------------------------------------------------
-# CMI Alianza — Stack para Portainer + Traefik
+# CMI Alianza — Stack para desplegar en el servidor con Portainer CE
+# (stack desde Git, "Compose path": docker-compose.portainer.yml).
+# Para desarrollo local se sigue usando docker-compose.yml / docker-compose.local.yml.
 # ---------------------------------------------------------------------------
-# Diferencias con docker-compose.yml (que publica puertos 8080/8443 directo):
-#   - NO publica puertos al host  -> Traefik gestiona el ingreso (evita conflictos
-#     de puertos cuando conviven varios stacks en el mismo servidor).
-#   - Traefik termina el TLS       -> nginx solo expone el puerto 80 interno;
-#     no se usa el certificado autofirmado de docker/nginx/ssl.
-#   - Doble red: `proxy` (externa, la de Traefik) solo en nginx, e `internal`
-#     (privada) para app <-> nginx <-> mysql.
-#   - Reutiliza los MISMOS datos del servidor actual (DATA_ROOT=/data), por lo
-#     que no requiere migrar la base ni los documentos ya cargados.
+# Diferencias con docker-compose.yml:
+# - `pull_policy: build` en las imágenes propias (app, nginx): evita que Portainer
+#   intente DESCARGAR `cmi_app`/`cmi_nginx` de un registro (de ahí el error
+#   "pull access denied for cmi_app"). Con "Pull and redeploy" se reconstruyen.
+# - SIN bind mounts del repo (`.:/var/www`): Portainer clona el repo dentro de su
+#   propio contenedor, así que esa ruta no existe en el host y Docker montaría
+#   carpetas vacías sobre el código. El código sale de la imagen (COPY . .).
+# - Las variables NO salen de un `.env` (no existe al clonar por Git) sino de las
+#   "Environment variables" del stack (Portainer > Stack > Environment).
+# - Datos persistentes (MySQL, documentos, storage) en volúmenes con nombre.
+# - Entrada pública por el Traefik del servidor (red externa net_proxy, TLS en
+#   Traefik, entrypoint websecure). Router/servicio `cmi` para no chocar con
+#   otros stacks del mismo Traefik.
 #
-# Variables a definir en el entorno del stack (Portainer > Stack > Environment):
-#   APP_KEY        (OBLIGATORIA; genérala con `php artisan key:generate --show`)
-#   APP_HOST       (ej. cmi-dev.servitel.co)
-#   APP_URL        (ej. https://cmi-dev.servitel.co)
-#   APP_ENV, APP_DEBUG, APP_LOCALE (opcionales; por defecto local/true/es)
-#   TRAEFIK_NET    (nombre de la red externa de Traefik; por defecto net_proxy)
+# Variables del stack (Portainer > Stack > Environment):
+#   APP_KEY            OBLIGATORIA  -> `php artisan key:generate --show`
+#   DB_PASSWORD        OBLIGATORIA
+#   DB_ROOT_PASSWORD   OBLIGATORIA
+#   APP_HOST           (por defecto cmi-dev.servitel.co)
+#   APP_URL            (por defecto https://cmi-dev.servitel.co)
+#   APP_ENV, APP_DEBUG, APP_LOCALE, LOG_LEVEL   (opcionales; defaults dev)
+#   DB_DATABASE, DB_USERNAME                    (por defecto cmi / cmi)
 #   TRAEFIK_ENTRYPOINT (por defecto websecure)
-#   TRAEFIK_CERTRESOLVER (opcional; si Traefik usa Let's Encrypt, ej. le)
-#   DATA_ROOT      (raíz de datos persistentes en el host; por defecto /data)
-#   DB_DATABASE, DB_USERNAME, DB_PASSWORD, DB_ROOT_PASSWORD
 #
-# IMPORTANTE: antes de desplegar este stack, DETÉN el stack anterior
-# (docker-compose.yml). MySQL no puede abrir el mismo directorio de datos
-# (/data/cmi_mysql) desde dos contenedores a la vez.
+# La red externa net_proxy la crea Traefik; debe existir antes del despliegue.
 # ---------------------------------------------------------------------------
+
+name: cmi-alianza
 
 services:
 
@@ -33,17 +38,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: cmi_app
-    container_name: cmi_app
+    pull_policy: build
+    container_name: cmi-app
     restart: unless-stopped
     working_dir: /var/www
-    # Config de Laravel vía variables de entorno (Portainer las inyecta desde
-    # la sección "Environment" del stack). Así NO se depende de un archivo .env
-    # en el repo, que no existe al clonar por Git (el .env está en .gitignore).
+    # Config de Laravel por entorno (Portainer las inyecta). Las marcadas con
+    # :? fallan con un mensaje claro si no se definen.
     environment:
       APP_NAME: ${APP_NAME:-CMI Alianza}
       APP_ENV: ${APP_ENV:-local}
-      APP_KEY: ${APP_KEY}
+      APP_KEY: ${APP_KEY:?falta APP_KEY en las variables del stack}
       APP_DEBUG: ${APP_DEBUG:-true}
       APP_URL: ${APP_URL:-https://cmi-dev.servitel.co}
       APP_LOCALE: ${APP_LOCALE:-es}
@@ -52,9 +56,9 @@ services:
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: "3306"
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE:-cmi}
+      DB_USERNAME: ${DB_USERNAME:-cmi}
+      DB_PASSWORD: ${DB_PASSWORD:?falta DB_PASSWORD en las variables del stack}
       SESSION_DRIVER: database
       CACHE_STORE: database
       QUEUE_CONNECTION: database
@@ -65,32 +69,31 @@ services:
       driver: "json-file"
       options: { max-size: "50m", max-file: "3" }
     volumes:
-      - .:/var/www
-      - ${DATA_ROOT:-/data}/cmi_storage:/var/www/storage/app
-      - ${DATA_ROOT:-/data}:/var/www/public/Documentos
-    networks:
-      - internal
+      - cmi-storage:/var/www/storage/app
+      - cmi-bodega:/var/www/public/bodega_documental
+    networks: [red]
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   nginx:
-    image: nginx:alpine
-    container_name: cmi_nginx
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    pull_policy: build
+    container_name: cmi-nginx
     restart: unless-stopped
     logging:
       driver: "json-file"
       options: { max-size: "20m", max-file: "3" }
+    # Mismo volumen de documentos que `app` para poder servirlos como estáticos.
     volumes:
-      - .:/var/www
-      - ${DATA_ROOT:-/data}/cmi_storage:/var/www/storage/app
-      - ${DATA_ROOT:-/data}:/var/www/public/Documentos
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - app
-    networks:
-      - proxy
-      - internal
+      - cmi-bodega:/var/www/public/bodega_documental
+    networks: [red, net_proxy]
+    depends_on: [app]
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=${TRAEFIK_NET:-net_proxy}"
+      - "traefik.docker.network=net_proxy"
       - "traefik.http.routers.cmi.rule=Host(`${APP_HOST:-cmi-dev.servitel.co}`)"
       - "traefik.http.routers.cmi.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
       - "traefik.http.routers.cmi.tls=true"
@@ -100,29 +103,46 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: cmi_mysql
+    container_name: cmi-mysql
     restart: unless-stopped
     logging:
       driver: "json-file"
       options: { max-size: "50m", max-file: "3" }
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:-cmi}
+      MYSQL_USER: ${DB_USERNAME:-cmi}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?falta DB_PASSWORD en las variables del stack}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?falta DB_ROOT_PASSWORD en las variables del stack}
+      TZ: America/Bogota
+    command: >-
+      --default-time-zone=-05:00
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
     volumes:
-      - ${DATA_ROOT:-/data}/cmi_mysql:/var/lib/mysql
-    networks:
-      - internal
+      - cmi-mysql-data:/var/lib/mysql
+    networks: [red]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+      start_interval: 2s
 
 # ---------------------------------------------------------------------------
 # Redes
-#   proxy    -> red EXTERNA ya creada por Traefik (no la crea este stack).
-#   internal -> red privada del stack (sin salida al proxy).
+#   red       -> privada del stack (app <-> nginx <-> mysql).
+#   net_proxy -> red EXTERNA del Traefik del servidor (no la crea este stack).
 # ---------------------------------------------------------------------------
 networks:
-  proxy:
+  red:
+    name: cmi-red
+  net_proxy:
     external: true
-    name: ${TRAEFIK_NET:-net_proxy}
-  internal:
-    driver: bridge
+
+volumes:
+  cmi-mysql-data:
+    name: cmi-mysql-data
+  cmi-storage:
+    name: cmi-storage
+  cmi-bodega:
+    name: cmi-bodega
